@@ -400,7 +400,7 @@ button { font: inherit; }
 
 /* -------------------------------------------------------------- Marquee */
 .marquee { background: var(--ink); color: #fff; overflow: hidden; padding-block: 18px; border-block: 1px solid #000; }
-.marquee__track { display: flex; width: max-content; animation: marquee 60s linear infinite; }
+.marquee__track { display: flex; width: max-content; animation: marquee 240s linear infinite; }
 .marquee:hover .marquee__track { animation-play-state: paused; }
 .marquee__group { display: flex; align-items: center; flex: none; }
 .marquee a { display: inline-flex; align-items: center; gap: 22px; padding-right: 22px; color: #fff; text-decoration: none; font-family: var(--font-display); font-size: clamp(1.3rem, 2vw + .5rem, 2.1rem); font-weight: 800; letter-spacing: -.03em; white-space: nowrap; }
@@ -732,7 +732,8 @@ button { font: inherit; }
 .round-btn .icon { width: 20px; height: 20px; }
 .on-dark .round-btn { background: transparent; border-color: rgba(255, 255, 255, .25); color: #fff; }
 .on-dark .round-btn:hover { background: #fff; color: var(--ink); }
-.reviews__track { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(300px, 400px); align-items: start; gap: 18px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 6px var(--gutter) 24px; margin-inline: calc(var(--gutter) * -1); scrollbar-width: thin; scroll-padding-inline: var(--gutter); }
+.reviews__track { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(300px, 400px); align-items: start; gap: 18px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 6px var(--gutter) 24px; margin-inline: calc(var(--gutter) * -1); scrollbar-width: thin; scroll-padding-inline: var(--gutter); scrollbar-width: none; }
+.reviews__track::-webkit-scrollbar { display: none; }
 .review { scroll-snap-align: start; display: flex; flex-direction: column; gap: 14px; padding: 26px; border-radius: var(--r); background: var(--white); border: 1px solid var(--line); box-shadow: var(--shadow-sm); margin: 0; }
 .on-dark .review { background: var(--teal-800); border-color: rgba(255, 255, 255, .08); box-shadow: none; }
 .stars { display: inline-flex; gap: 2px; color: #f5a623; }
@@ -790,15 +791,13 @@ button { font: inherit; }
 @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(23, 112, 63, .5); } 70% { box-shadow: 0 0 0 8px rgba(23, 112, 63, 0); } 100% { box-shadow: 0 0 0 0 rgba(23, 112, 63, 0); } }
 .map { position: relative; aspect-ratio: 16 / 10; border-radius: var(--r); overflow: hidden; background: var(--teal-800); isolation: isolate; }
 .map iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
-.map__ph { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 20px; color: #fff; z-index: 1; }
-.map__ph::before { content: ""; position: absolute; inset: 0; z-index: -1; opacity: .35; background:
-  linear-gradient(rgba(255, 255, 255, .08) 1px, transparent 1px) 0 0 / 34px 34px,
-  linear-gradient(90deg, rgba(255, 255, 255, .08) 1px, transparent 1px) 0 0 / 34px 34px; }
-.map__ph::after { content: ""; position: absolute; inset: 0; z-index: -1; background: radial-gradient(260px 200px at 50% 45%, rgba(245, 111, 70, .3), transparent 70%); }
-.map__pin { width: 64px; height: 64px; margin: 0 auto 10px; display: grid; place-items: center; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); background: var(--orange); color: var(--ink); box-shadow: 0 14px 30px -10px rgba(0, 0, 0, .6); }
-.map__pin .icon { transform: rotate(45deg); width: 28px; height: 28px; }
-.map__ph p { margin: 6px 0 14px; color: #cfe0e5; font-size: .95rem; }
-.map__ph strong { color: #fff; font-family: var(--font-display); font-size: 1.1rem; }
+.map--wide { aspect-ratio: auto; height: clamp(320px, 34vw, 460px); }
+.map--side { aspect-ratio: auto; height: 100%; min-height: 420px; }
+.map__directions { position: absolute; right: 16px; bottom: 16px; z-index: 2; box-shadow: var(--shadow); }
+.section--after-marquee { padding-top: clamp(24px, 3vw, 40px); }
+.section--after-marquee .intro-grid { align-items: start; }
+.section--after-marquee .intro-art img { max-width: 440px; margin-top: -24px; }
+.section--after-marquee .intro-grid > .reveal:last-child { padding-top: clamp(16px, 4vw, 64px); }
 
 /* -------------------------------------------------------------- CTA band */
 .cta-band { position: relative; overflow: hidden; border-radius: var(--r-lg); padding: clamp(32px, 5vw, 64px); background: var(--orange); color: var(--ink); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px 48px; align-items: center; isolation: isolate; }

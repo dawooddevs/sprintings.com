@@ -1,6 +1,7 @@
 <?php
 /**
- * Contact details, opening hours and a click-to-load map, beside a form.
+ * Contact details and opening hours beside a form, with a full-width map below
+ * (or the map beside the details when there is no form).
  * @var string $form form key  @var array|null $product  @var string $title  @var string $intro  @var bool $dark
  */
 $shop = Content::shop();
@@ -29,41 +30,10 @@ $form = array_key_exists('form', get_defined_vars()) ? $form : 'contact';
       <?php endforeach; ?>
     </table>
     <?php endif; ?>
-    <?php if ($form): ?>
-    <?php if ($shop): ?>
-    <div class="map" style="margin-top:24px" data-map data-src="<?= e(Content::mapEmbed($shop)) ?>">
-      <div class="map__ph">
-        <div>
-          <div class="map__pin"><?= icon('map-pin') ?></div>
-          <strong><?= e($shop['address']) ?></strong>
-          <p><?= e($shop['city'] . ', ' . $shop['state'] . ' ' . $shop['zip']) ?></p>
-          <div class="btn-row" style="justify-content:center">
-            <button class="btn btn--accent btn--sm js-only" type="button" data-map-load>Show map</button>
-            <a class="btn btn--ghost-light btn--ghost btn--sm" href="<?= e(Content::mapsDirections($shop)) ?>" target="_blank" rel="noopener">Directions<?= icon('arrow-up-right') ?></a>
-          </div>
-        </div>
-      </div>
-    </div>
-    <?php endif; ?>
-    <?php endif; ?>
   </div>
   <div class="reveal" style="--d:.1s">
     <?php if (!$form): ?>
-    <?php if ($shop): ?>
-    <div class="map" style="aspect-ratio:auto;min-height:420px;height:100%" data-map data-src="<?= e(Content::mapEmbed($shop)) ?>">
-      <div class="map__ph">
-        <div>
-          <div class="map__pin"><?= icon('map-pin') ?></div>
-          <strong><?= e($shop['address']) ?></strong>
-          <p><?= e($shop['city'] . ', ' . $shop['state'] . ' ' . $shop['zip']) ?></p>
-          <div class="btn-row" style="justify-content:center">
-            <button class="btn btn--accent btn--sm js-only" type="button" data-map-load>Show map</button>
-            <a class="btn btn--ghost-light btn--ghost btn--sm" href="<?= e(Content::mapsDirections($shop)) ?>" target="_blank" rel="noopener">Directions<?= icon('arrow-up-right') ?></a>
-          </div>
-        </div>
-      </div>
-    </div>
-    <?php endif; ?>
+    <?php partial('map', ['shop' => $shop, 'class' => 'map--side']); ?>
     <?php else: ?>
     <div class="quote-card">
       <div class="quote-card__head">
@@ -76,3 +46,6 @@ $form = array_key_exists('form', get_defined_vars()) ? $form : 'contact';
     <?php endif; ?>
   </div>
 </div>
+<?php if ($form && $shop): ?>
+<div class="reveal" style="margin-top:clamp(32px,4vw,48px)"><?php partial('map', ['shop' => $shop, 'class' => 'map--wide']); ?></div>
+<?php endif; ?>

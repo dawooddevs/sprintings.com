@@ -87,7 +87,7 @@ $sizes = ['tile--xl', 'tile--lg', 'tile', 'tile', 'tile', 'tile--wide', 'tile--w
 </section>
 <?php endif; ?>
 
-<section class="section">
+<section class="section section--after-marquee">
   <div class="container">
     <div class="intro-grid">
       <div class="intro-art reveal reveal--left">

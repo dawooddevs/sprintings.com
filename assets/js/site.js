@@ -248,23 +248,6 @@
     });
   });
 
-  /* ---------------------------------------------------------- Click-to-load map */
-  $$('[data-map]').forEach(function (m) {
-    var b = $('[data-map-load]', m);
-    if (!b) return;
-    b.addEventListener('click', function () {
-      var f = document.createElement('iframe');
-      f.src = m.getAttribute('data-src');
-      f.title = 'Map showing our shop location';
-      f.loading = 'lazy';
-      f.referrerPolicy = 'no-referrer-when-downgrade';
-      f.allowFullscreen = true;
-      m.appendChild(f);
-      var ph = $('.map__ph', m); if (ph) ph.remove();
-      f.focus();
-    });
-  });
-
   /* ---------------------------------------------------------- Opening hours: today + open now (Long Beach time) */
   $$('[data-hours]').forEach(function (tbl) {
     var now;
