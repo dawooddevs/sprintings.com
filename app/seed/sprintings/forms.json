@@ -1,0 +1,1924 @@
+[
+  {
+    "id": 1,
+    "title": "Main Site Quote",
+    "active": true,
+    "button": "Submit",
+    "fields": [
+      {
+        "id": 1,
+        "type": "name",
+        "label": "Name",
+        "isRequired": false,
+        "size": "medium",
+        "visibility": "visible",
+        "inputs": [
+          "First",
+          "Last"
+        ]
+      },
+      {
+        "id": 2,
+        "type": "email",
+        "label": "Email",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 5,
+        "type": "phone",
+        "label": "Phone",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 6,
+        "type": "text",
+        "label": "Company Name",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 14,
+        "type": "address",
+        "label": "Address",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible",
+        "inputs": [
+          "Street Address",
+          "Address Line 2",
+          "City",
+          "State / Province",
+          "ZIP / Postal Code",
+          "Country"
+        ]
+      },
+      {
+        "id": 15,
+        "type": "text",
+        "label": "Project Name",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 16,
+        "type": "text",
+        "label": "Quantity",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 17,
+        "type": "text",
+        "label": "Size",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 18,
+        "type": "text",
+        "label": "Paper",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 19,
+        "type": "text",
+        "label": "Color",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 20,
+        "type": "text",
+        "label": "Finish",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 21,
+        "type": "fileupload",
+        "label": "File",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 3,
+        "type": "textarea",
+        "label": "Comments",
+        "isRequired": false,
+        "description": "Please let us know what&#039;s on your mind. Have a question for us? Ask away.",
+        "size": "medium",
+        "visibility": "visible"
+      }
+    ],
+    "notifications": [
+      {
+        "name": "User Notification",
+        "to": "2",
+        "subject": "We have received your inquiry",
+        "isActive": true
+      },
+      {
+        "name": "Admin Notification",
+        "to": "sales@sprintings.com , support@theattitudemarketing.com",
+        "subject": "New Quote Request {form_title}",
+        "isActive": true
+      }
+    ],
+    "confirmations": [
+      {
+        "type": "message",
+        "message": "Thank you for contacting us! We will get in touch with you shortly.",
+        "page": 0,
+        "url": ""
+      }
+    ],
+    "used_on": [
+      "/request-a-quote/",
+      "template:global form"
+    ]
+  },
+  {
+    "id": 2,
+    "title": "Contact Us Directly",
+    "active": true,
+    "button": "Submit",
+    "fields": [
+      {
+        "id": 1,
+        "type": "name",
+        "label": "Name",
+        "isRequired": false,
+        "size": "medium",
+        "visibility": "visible",
+        "inputs": [
+          "First",
+          "Last"
+        ]
+      },
+      {
+        "id": 2,
+        "type": "email",
+        "label": "Email",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 5,
+        "type": "phone",
+        "label": "Phone",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 3,
+        "type": "textarea",
+        "label": "Comments",
+        "isRequired": false,
+        "description": "Please let us know what&#039;s on your mind. Have a question for us? Ask away.",
+        "size": "medium",
+        "visibility": "visible"
+      }
+    ],
+    "notifications": [
+      {
+        "name": "User Notification",
+        "to": "2",
+        "subject": "We have received your inquiry",
+        "isActive": true
+      },
+      {
+        "name": "Admin Notification",
+        "to": "support@theattitudemarketing.com, sales@sprintings.com",
+        "subject": "New submission from {form_title}",
+        "isActive": true
+      }
+    ],
+    "confirmations": [
+      {
+        "type": "message",
+        "message": "Thank you for contacting us! We will get in touch with you shortly.",
+        "page": 0,
+        "url": ""
+      }
+    ],
+    "used_on": [
+      "/contact/"
+    ]
+  },
+  {
+    "id": 3,
+    "title": "Product General Form",
+    "active": true,
+    "button": "Submit",
+    "fields": [
+      {
+        "id": 6,
+        "type": "text",
+        "label": "Name",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 2,
+        "type": "email",
+        "label": "Email",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 4,
+        "type": "phone",
+        "label": "Phone",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 3,
+        "type": "textarea",
+        "label": "How Can We Help You?",
+        "isRequired": false,
+        "size": "medium",
+        "visibility": "visible"
+      }
+    ],
+    "notifications": [
+      {
+        "name": "User Notification",
+        "to": "2",
+        "subject": "We have received your inquiry",
+        "isActive": true
+      },
+      {
+        "name": "Admin Notification",
+        "to": "sales@sprintings.com , support@theattitudemarketing.com",
+        "subject": "New submission from {form_title}",
+        "isActive": true
+      }
+    ],
+    "confirmations": [
+      {
+        "type": "message",
+        "message": "Thank you for contacting us! We will get in touch with you shortly.",
+        "page": 0,
+        "url": ""
+      }
+    ],
+    "used_on": [
+      "/service/booklets-magazines-catalogs/",
+      "/service/books/",
+      "/service/brochures/",
+      "/service/business-cards/",
+      "/service/door-hanger-printing/",
+      "/service/election-printing/",
+      "/service/envelope-printing/",
+      "/service/flyer-printing/",
+      "/service/invitations/",
+      "/service/letterheads/",
+      "/service/postcards/",
+      "/service/signage-banners/",
+      "/service/stickers-roll-labels/"
+    ]
+  },
+  {
+    "id": 4,
+    "title": "Product General Form2",
+    "active": false,
+    "button": "Enter!",
+    "fields": [
+      {
+        "id": 1,
+        "type": "name",
+        "label": "Name",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible",
+        "inputs": [
+          "First",
+          "Last"
+        ]
+      },
+      {
+        "id": 2,
+        "type": "email",
+        "label": "Email",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 7,
+        "type": "radio",
+        "label": "The answer is...",
+        "isRequired": false,
+        "size": "medium",
+        "visibility": "visible",
+        "choices": [
+          "Answer A",
+          "Answer B",
+          "Answer C"
+        ]
+      },
+      {
+        "id": 5,
+        "type": "consent",
+        "label": "Competition Terms and Conditions",
+        "isRequired": true,
+        "description": "Terms and conditions placeholder.",
+        "size": "large",
+        "visibility": "visible",
+        "choices": [
+          "Checked"
+        ]
+      }
+    ],
+    "notifications": [
+      {
+        "name": "User Notification",
+        "to": "2",
+        "subject": "You have successfully entered our competition",
+        "isActive": true
+      },
+      {
+        "name": "Admin Notification",
+        "to": "{admin_email}",
+        "subject": "New submission from {form_title}",
+        "isActive": true
+      }
+    ],
+    "confirmations": [
+      {
+        "type": "message",
+        "message": "Thank you for entering our competition! The winners will be contacted via email.",
+        "page": 0,
+        "url": ""
+      }
+    ],
+    "used_on": []
+  },
+  {
+    "id": 5,
+    "title": "Paper Size Form",
+    "active": true,
+    "button": "Submit",
+    "fields": [
+      {
+        "id": 7,
+        "type": "text",
+        "label": "Name",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 2,
+        "type": "email",
+        "label": "Email",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 8,
+        "type": "phone",
+        "label": "Phone",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 4,
+        "type": "text",
+        "label": "Paper Size",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 5,
+        "type": "text",
+        "label": "Paper Stocks",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 6,
+        "type": "text",
+        "label": "Print Options",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 3,
+        "type": "textarea",
+        "label": "How Can We Help You?",
+        "isRequired": false,
+        "size": "medium",
+        "visibility": "visible"
+      }
+    ],
+    "notifications": [
+      {
+        "name": "User Notification",
+        "to": "2",
+        "subject": "We have received your inquiry",
+        "isActive": true
+      },
+      {
+        "name": "Admin Notification",
+        "to": "sales@sprintings.com , support@theattitudemarketing.com",
+        "subject": "New submission from {form_title}",
+        "isActive": true
+      }
+    ],
+    "confirmations": [
+      {
+        "type": "message",
+        "message": "Thank you for contacting us! We will get in touch with you shortly.",
+        "page": 0,
+        "url": ""
+      }
+    ],
+    "used_on": [
+      "/service/door-hangers/",
+      "/service/event-tickets/",
+      "/service/folders/",
+      "/service/mini-menus/",
+      "/service/staggered-cut-flyers/",
+      "/service/table-tents/"
+    ]
+  },
+  {
+    "id": 6,
+    "title": "Booklets",
+    "active": true,
+    "button": "Submit",
+    "fields": [
+      {
+        "id": 7,
+        "type": "text",
+        "label": "Name",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 2,
+        "type": "email",
+        "label": "Email",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 9,
+        "type": "phone",
+        "label": "Phone",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 4,
+        "type": "text",
+        "label": "Paper Size",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 5,
+        "type": "text",
+        "label": "Paper Stocks",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 6,
+        "type": "text",
+        "label": "Binding Options",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 8,
+        "type": "text",
+        "label": "Specialty Finishes",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 3,
+        "type": "textarea",
+        "label": "How Can We Help You?",
+        "isRequired": false,
+        "size": "medium",
+        "visibility": "visible"
+      }
+    ],
+    "notifications": [
+      {
+        "name": "User Notification",
+        "to": "2",
+        "subject": "We have received your inquiry",
+        "isActive": true
+      },
+      {
+        "name": "Admin Notification",
+        "to": "sales@sprintings.com , support@theattitudemarketing.com",
+        "subject": "New submission from {form_title}",
+        "isActive": true
+      }
+    ],
+    "confirmations": [
+      {
+        "type": "message",
+        "message": "Thank you for contacting us! We will get in touch with you shortly.",
+        "page": 0,
+        "url": ""
+      }
+    ],
+    "used_on": [
+      "/service/booklets/",
+      "/service/bookmarks/",
+      "/service/brochures-2/"
+    ]
+  },
+  {
+    "id": 7,
+    "title": "Booklets/Catalogs",
+    "active": true,
+    "button": "Submit",
+    "fields": [
+      {
+        "id": 7,
+        "type": "text",
+        "label": "Name",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 2,
+        "type": "email",
+        "label": "Email",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 9,
+        "type": "phone",
+        "label": "Phone",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 4,
+        "type": "text",
+        "label": "Paper Size",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 5,
+        "type": "text",
+        "label": "Paper Stocks",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 6,
+        "type": "text",
+        "label": "Binding Options",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 8,
+        "type": "text",
+        "label": "Cover Options",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 3,
+        "type": "textarea",
+        "label": "How Can We Help You?",
+        "isRequired": false,
+        "size": "medium",
+        "visibility": "visible"
+      }
+    ],
+    "notifications": [
+      {
+        "name": "User Notification",
+        "to": "2",
+        "subject": "We have received your inquiry",
+        "isActive": true
+      },
+      {
+        "name": "Admin Notification",
+        "to": "sales@sprintings.com , support@theattitudemarketing.com",
+        "subject": "New submission from {form_title}",
+        "isActive": true
+      }
+    ],
+    "confirmations": [
+      {
+        "type": "message",
+        "message": "Thank you for contacting us! We will get in touch with you shortly.",
+        "page": 0,
+        "url": ""
+      }
+    ],
+    "used_on": [
+      "/service/booklets-catalogs/"
+    ]
+  },
+  {
+    "id": 8,
+    "title": "Business Card Magnets",
+    "active": true,
+    "button": "Submit",
+    "fields": [
+      {
+        "id": 7,
+        "type": "text",
+        "label": "Name",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 2,
+        "type": "email",
+        "label": "Email",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 8,
+        "type": "phone",
+        "label": "Phone",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 4,
+        "type": "text",
+        "label": "Paper Size",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 5,
+        "type": "text",
+        "label": "Paper Stocks",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 6,
+        "type": "text",
+        "label": "Print Options",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 3,
+        "type": "textarea",
+        "label": "How Can We Help You?",
+        "isRequired": false,
+        "size": "medium",
+        "visibility": "visible"
+      }
+    ],
+    "notifications": [
+      {
+        "name": "User Notification",
+        "to": "2",
+        "subject": "We have received your inquiry",
+        "isActive": true
+      },
+      {
+        "name": "Admin Notification",
+        "to": "sales@sprintings.com , support@theattitudemarketing.com",
+        "subject": "New submission from {form_title}",
+        "isActive": true
+      }
+    ],
+    "confirmations": [
+      {
+        "type": "message",
+        "message": "Thank you for contacting us! We will get in touch with you shortly.",
+        "page": 0,
+        "url": ""
+      }
+    ],
+    "used_on": [
+      "/service/business-card-magnets/"
+    ]
+  },
+  {
+    "id": 9,
+    "title": "Calendars",
+    "active": true,
+    "button": "Submit",
+    "fields": [
+      {
+        "id": 7,
+        "type": "text",
+        "label": "Name",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 2,
+        "type": "email",
+        "label": "Email",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 10,
+        "type": "phone",
+        "label": "Phone",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 9,
+        "type": "text",
+        "label": "No. of Pages",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 4,
+        "type": "text",
+        "label": "Paper Size",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 5,
+        "type": "text",
+        "label": "Paper Stocks",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 8,
+        "type": "text",
+        "label": "Cover Options",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 3,
+        "type": "textarea",
+        "label": "How Can We Help You?",
+        "isRequired": false,
+        "size": "medium",
+        "visibility": "visible"
+      }
+    ],
+    "notifications": [
+      {
+        "name": "User Notification",
+        "to": "2",
+        "subject": "We have received your inquiry",
+        "isActive": true
+      },
+      {
+        "name": "Admin Notification",
+        "to": "sales@sprintings.com , support@theattitudemarketing.com",
+        "subject": "New submission from {form_title}",
+        "isActive": true
+      }
+    ],
+    "confirmations": [
+      {
+        "type": "message",
+        "message": "Thank you for contacting us! We will get in touch with you shortly.",
+        "page": 0,
+        "url": ""
+      }
+    ],
+    "used_on": [
+      "/service/calendars/"
+    ]
+  },
+  {
+    "id": 10,
+    "title": "Club Flyers",
+    "active": true,
+    "button": "Submit",
+    "fields": [
+      {
+        "id": 7,
+        "type": "text",
+        "label": "Name",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 2,
+        "type": "email",
+        "label": "Email",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 9,
+        "type": "phone",
+        "label": "Phone",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 4,
+        "type": "text",
+        "label": "Paper Size",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 5,
+        "type": "text",
+        "label": "Paper Stocks",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 6,
+        "type": "text",
+        "label": "Print Options",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 8,
+        "type": "text",
+        "label": "Specialty Finishes",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 3,
+        "type": "textarea",
+        "label": "How Can We Help You?",
+        "isRequired": false,
+        "size": "medium",
+        "visibility": "visible"
+      }
+    ],
+    "notifications": [
+      {
+        "name": "User Notification",
+        "to": "2",
+        "subject": "We have received your inquiry",
+        "isActive": true
+      },
+      {
+        "name": "Admin Notification",
+        "to": "sales@sprintings.com , support@theattitudemarketing.com",
+        "subject": "New submission from {form_title}",
+        "isActive": true
+      }
+    ],
+    "confirmations": [
+      {
+        "type": "message",
+        "message": "Thank you for contacting us! We will get in touch with you shortly.",
+        "page": 0,
+        "url": ""
+      }
+    ],
+    "used_on": [
+      "/service/club-flyers/",
+      "/service/collectors-cards/",
+      "/service/greeting-cards/",
+      "/service/postcards-paper/",
+      "/service/rack-cards/"
+    ]
+  },
+  {
+    "id": 11,
+    "title": "Flyers",
+    "active": true,
+    "button": "Submit",
+    "fields": [
+      {
+        "id": 7,
+        "type": "text",
+        "label": "Name",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 2,
+        "type": "email",
+        "label": "Email",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 9,
+        "type": "phone",
+        "label": "Phone",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 4,
+        "type": "text",
+        "label": "Paper Size",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 5,
+        "type": "text",
+        "label": "Paper Stocks",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 6,
+        "type": "text",
+        "label": "Print Options",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 8,
+        "type": "text",
+        "label": "Cover Options",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 3,
+        "type": "textarea",
+        "label": "How Can We Help You?",
+        "isRequired": false,
+        "size": "medium",
+        "visibility": "visible"
+      }
+    ],
+    "notifications": [
+      {
+        "name": "User Notification",
+        "to": "2",
+        "subject": "We have received your inquiry",
+        "isActive": true
+      },
+      {
+        "name": "Admin Notification",
+        "to": "sales@sprintings.com , support@theattitudemarketing.com",
+        "subject": "New submission from {form_title}",
+        "isActive": true
+      }
+    ],
+    "confirmations": [
+      {
+        "type": "message",
+        "message": "Thank you for contacting us! We will get in touch with you shortly.",
+        "page": 0,
+        "url": ""
+      }
+    ],
+    "used_on": [
+      "/service/flyers/"
+    ]
+  },
+  {
+    "id": 12,
+    "title": "Folded Business Cards",
+    "active": true,
+    "button": "Submit",
+    "fields": [
+      {
+        "id": 7,
+        "type": "text",
+        "label": "Name",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 2,
+        "type": "email",
+        "label": "Email",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 10,
+        "type": "phone",
+        "label": "Phone",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 4,
+        "type": "text",
+        "label": "Paper Size",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 5,
+        "type": "text",
+        "label": "Paper Stocks",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 6,
+        "type": "text",
+        "label": "Print Options",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 8,
+        "type": "text",
+        "label": "Binding Options",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 9,
+        "type": "text",
+        "label": "Specialty Finishes",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 3,
+        "type": "textarea",
+        "label": "How Can We Help You?",
+        "isRequired": false,
+        "size": "medium",
+        "visibility": "visible"
+      }
+    ],
+    "notifications": [
+      {
+        "name": "User Notification",
+        "to": "2",
+        "subject": "We have received your inquiry",
+        "isActive": true
+      },
+      {
+        "name": "Admin Notification",
+        "to": "sales@sprintings.com , support@theattitudemarketing.com",
+        "subject": "New submission from {form_title}",
+        "isActive": true
+      }
+    ],
+    "confirmations": [
+      {
+        "type": "message",
+        "message": "Thank you for contacting us! We will get in touch with you shortly.",
+        "page": 0,
+        "url": ""
+      }
+    ],
+    "used_on": [
+      "/service/folded-business-cards/"
+    ]
+  },
+  {
+    "id": 13,
+    "title": "Folded Hang Tags",
+    "active": true,
+    "button": "Submit",
+    "fields": [
+      {
+        "id": 7,
+        "type": "text",
+        "label": "Name",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 2,
+        "type": "email",
+        "label": "Email",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 9,
+        "type": "phone",
+        "label": "Phone",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 4,
+        "type": "text",
+        "label": "Paper Size",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 5,
+        "type": "text",
+        "label": "Paper Stocks",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 6,
+        "type": "text",
+        "label": "Print Options",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 8,
+        "type": "text",
+        "label": "Drill Hole Positions",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 3,
+        "type": "textarea",
+        "label": "How Can We Help You?",
+        "isRequired": false,
+        "size": "medium",
+        "visibility": "visible"
+      }
+    ],
+    "notifications": [
+      {
+        "name": "User Notification",
+        "to": "2",
+        "subject": "We have received your inquiry",
+        "isActive": true
+      },
+      {
+        "name": "Admin Notification",
+        "to": "sales@sprintings.com , support@theattitudemarketing.com",
+        "subject": "New submission from {form_title}",
+        "isActive": true
+      }
+    ],
+    "confirmations": [
+      {
+        "type": "message",
+        "message": "Thank you for contacting us! We will get in touch with you shortly.",
+        "page": 0,
+        "url": ""
+      }
+    ],
+    "used_on": [
+      "/service/folded-hang-tags/"
+    ]
+  },
+  {
+    "id": 14,
+    "title": "Hang Tags",
+    "active": true,
+    "button": "Submit",
+    "fields": [
+      {
+        "id": 7,
+        "type": "text",
+        "label": "Name",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 2,
+        "type": "email",
+        "label": "Email",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 8,
+        "type": "phone",
+        "label": "Phone",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 4,
+        "type": "text",
+        "label": "Paper Size",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 5,
+        "type": "text",
+        "label": "Materials",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 6,
+        "type": "text",
+        "label": "Print Options",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 3,
+        "type": "textarea",
+        "label": "How Can We Help You?",
+        "isRequired": false,
+        "size": "medium",
+        "visibility": "visible"
+      }
+    ],
+    "notifications": [
+      {
+        "name": "User Notification",
+        "to": "2",
+        "subject": "We have received your inquiry",
+        "isActive": true
+      },
+      {
+        "name": "Admin Notification",
+        "to": "sales@sprintings.com , support@theattitudemarketing.com",
+        "subject": "New submission from {form_title}",
+        "isActive": true
+      }
+    ],
+    "confirmations": [
+      {
+        "type": "message",
+        "message": "Thank you for contacting us! We will get in touch with you shortly.",
+        "page": 0,
+        "url": ""
+      }
+    ],
+    "used_on": [
+      "/service/hang-tags/",
+      "/service/letterheads-paper/"
+    ]
+  },
+  {
+    "id": 15,
+    "title": "Notepads",
+    "active": true,
+    "button": "Submit",
+    "fields": [
+      {
+        "id": 7,
+        "type": "text",
+        "label": "Name",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 2,
+        "type": "email",
+        "label": "Email",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 10,
+        "type": "phone",
+        "label": "Phone",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 4,
+        "type": "text",
+        "label": "Paper Size",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 5,
+        "type": "text",
+        "label": "Paper Stocks",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 6,
+        "type": "text",
+        "label": "Print Options",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 9,
+        "type": "number",
+        "label": "Number of Pages",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 3,
+        "type": "textarea",
+        "label": "How Can We Help You?",
+        "isRequired": false,
+        "size": "medium",
+        "visibility": "visible"
+      }
+    ],
+    "notifications": [
+      {
+        "name": "User Notification",
+        "to": "2",
+        "subject": "We have received your inquiry",
+        "isActive": true
+      },
+      {
+        "name": "Admin Notification",
+        "to": "sales@sprintings.com , support@theattitudemarketing.com",
+        "subject": "New submission from {form_title}",
+        "isActive": true
+      }
+    ],
+    "confirmations": [
+      {
+        "type": "message",
+        "message": "Thank you for contacting us! We will get in touch with you shortly.",
+        "page": 0,
+        "url": ""
+      }
+    ],
+    "used_on": [
+      "/service/notepads/"
+    ]
+  },
+  {
+    "id": 16,
+    "title": "Postcard Magnets",
+    "active": true,
+    "button": "Submit",
+    "fields": [
+      {
+        "id": 7,
+        "type": "text",
+        "label": "Name",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 2,
+        "type": "email",
+        "label": "Email",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 11,
+        "type": "phone",
+        "label": "Phone",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 4,
+        "type": "text",
+        "label": "Paper Size",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 5,
+        "type": "text",
+        "label": "Features",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 6,
+        "type": "text",
+        "label": "Print On",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 10,
+        "type": "text",
+        "label": "Paper Uses",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 3,
+        "type": "textarea",
+        "label": "How Can We Help You?",
+        "isRequired": false,
+        "size": "medium",
+        "visibility": "visible"
+      }
+    ],
+    "notifications": [
+      {
+        "name": "User Notification",
+        "to": "2",
+        "subject": "We have received your inquiry",
+        "isActive": true
+      },
+      {
+        "name": "Admin Notification",
+        "to": "sales@sprintings.com , support@theattitudemarketing.com",
+        "subject": "New submission from {form_title}",
+        "isActive": true
+      }
+    ],
+    "confirmations": [
+      {
+        "type": "message",
+        "message": "Thank you for contacting us! We will get in touch with you shortly.",
+        "page": 0,
+        "url": ""
+      }
+    ],
+    "used_on": [
+      "/service/postcard-magnets/"
+    ]
+  },
+  {
+    "id": 17,
+    "title": "Rip Business Cards",
+    "active": true,
+    "button": "Submit",
+    "fields": [
+      {
+        "id": 7,
+        "type": "text",
+        "label": "Name",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 2,
+        "type": "email",
+        "label": "Email",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 9,
+        "type": "phone",
+        "label": "Phone",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 4,
+        "type": "text",
+        "label": "Paper Size",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 5,
+        "type": "text",
+        "label": "Materials",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 6,
+        "type": "text",
+        "label": "Print Options",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 8,
+        "type": "text",
+        "label": "Specialty Finishes",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 3,
+        "type": "textarea",
+        "label": "How Can We Help You?",
+        "isRequired": false,
+        "size": "medium",
+        "visibility": "visible"
+      }
+    ],
+    "notifications": [
+      {
+        "name": "User Notification",
+        "to": "2",
+        "subject": "We have received your inquiry",
+        "isActive": true
+      },
+      {
+        "name": "Admin Notification",
+        "to": "sales@sprintings.com , support@theattitudemarketing.com",
+        "subject": "New submission from {form_title}",
+        "isActive": true
+      }
+    ],
+    "confirmations": [
+      {
+        "type": "message",
+        "message": "Thank you for contacting us! We will get in touch with you shortly.",
+        "page": 0,
+        "url": ""
+      }
+    ],
+    "used_on": [
+      "/service/rip-business-cards/"
+    ]
+  },
+  {
+    "id": 18,
+    "title": "Roll Labels",
+    "active": true,
+    "button": "Submit",
+    "fields": [
+      {
+        "id": 7,
+        "type": "text",
+        "label": "Name",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 2,
+        "type": "email",
+        "label": "Email",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 10,
+        "type": "phone",
+        "label": "Phone",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 4,
+        "type": "text",
+        "label": "Shapes",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 5,
+        "type": "text",
+        "label": "Roll Label Shipping Rules",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 9,
+        "type": "text",
+        "label": "Print Options",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 8,
+        "type": "text",
+        "label": "Materials",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 3,
+        "type": "textarea",
+        "label": "How Can We Help You?",
+        "isRequired": false,
+        "size": "medium",
+        "visibility": "visible"
+      }
+    ],
+    "notifications": [
+      {
+        "name": "User Notification",
+        "to": "2",
+        "subject": "We have received your inquiry",
+        "isActive": true
+      },
+      {
+        "name": "Admin Notification",
+        "to": "sales@sprintings.com , support@theattitudemarketing.com",
+        "subject": "New submission from {form_title}",
+        "isActive": true
+      }
+    ],
+    "confirmations": [
+      {
+        "type": "message",
+        "message": "Thank you for contacting us! We will get in touch with you shortly.",
+        "page": 0,
+        "url": ""
+      }
+    ],
+    "used_on": [
+      "/service/roll-labels/"
+    ]
+  },
+  {
+    "id": 19,
+    "title": "Special Shapes",
+    "active": true,
+    "button": "Submit",
+    "fields": [
+      {
+        "id": 7,
+        "type": "text",
+        "label": "Name",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 2,
+        "type": "email",
+        "label": "Email",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 11,
+        "type": "phone",
+        "label": "Phone",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 4,
+        "type": "text",
+        "label": "Shapes",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 8,
+        "type": "text",
+        "label": "Materials",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 9,
+        "type": "text",
+        "label": "Paper Stocks",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 5,
+        "type": "text",
+        "label": "Print Options",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 10,
+        "type": "text",
+        "label": "Popular Sizes",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 3,
+        "type": "textarea",
+        "label": "How Can We Help You?",
+        "isRequired": false,
+        "size": "medium",
+        "visibility": "visible"
+      }
+    ],
+    "notifications": [
+      {
+        "name": "User Notification",
+        "to": "2",
+        "subject": "We have received your inquiry",
+        "isActive": true
+      },
+      {
+        "name": "Admin Notification",
+        "to": "sales@sprintings.com , support@theattitudemarketing.com",
+        "subject": "New submission from {form_title}",
+        "isActive": true
+      }
+    ],
+    "confirmations": [
+      {
+        "type": "message",
+        "message": "Thank you for contacting us! We will get in touch with you shortly.",
+        "page": 0,
+        "url": ""
+      }
+    ],
+    "used_on": [
+      "/service/special-shapes/"
+    ]
+  },
+  {
+    "id": 20,
+    "title": "Stickers",
+    "active": true,
+    "button": "Submit",
+    "fields": [
+      {
+        "id": 7,
+        "type": "text",
+        "label": "Name",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 2,
+        "type": "email",
+        "label": "Email",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 11,
+        "type": "phone",
+        "label": "Phone",
+        "isRequired": true,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 4,
+        "type": "text",
+        "label": "Shapes",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 9,
+        "type": "text",
+        "label": "Paper Stocks",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 10,
+        "type": "text",
+        "label": "Popular Sizes",
+        "isRequired": false,
+        "size": "large",
+        "visibility": "visible"
+      },
+      {
+        "id": 3,
+        "type": "textarea",
+        "label": "How Can We Help You?",
+        "isRequired": false,
+        "size": "medium",
+        "visibility": "visible"
+      }
+    ],
+    "notifications": [
+      {
+        "name": "User Notification",
+        "to": "2",
+        "subject": "We have received your inquiry",
+        "isActive": true
+      },
+      {
+        "name": "Admin Notification",
+        "to": "sales@sprintings.com , support@theattitudemarketing.com",
+        "subject": "New submission from {form_title}",
+        "isActive": true
+      }
+    ],
+    "confirmations": [
+      {
+        "type": "message",
+        "message": "Thank you for contacting us! We will get in touch with you shortly.",
+        "page": 0,
+        "url": ""
+      }
+    ],
+    "used_on": [
+      "/service/stickers/"
+    ]
+  }
+]

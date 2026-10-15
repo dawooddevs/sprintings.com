@@ -1,0 +1,12 @@
+---
+title: "Head"
+type: "header"
+status: publish
+---
+
+[image: dynamic (the post/page featured image)]
+[NAVIGATION MENU — see site.json → menus]
+Call Now
+(562) 294-3207
+[Button: Get A Quote]()
+[Button: Get A Quote]()

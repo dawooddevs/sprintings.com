@@ -1,0 +1,88 @@
+# Copy the Sprintings images from the SiteGround server into the repository, so the site can be built
+# and installed with them. Run once: GitHub → Actions → "Fetch Sprintings media" → Run workflow.
+#
+# Before running: in SiteGround File Manager for ahrons23.sg-host.com, create the folder
+# `sprintings-import` NEXT TO public_html (not inside it), upload sprintings-uploads.zip into it,
+# and Extract it there. The server path is then www/ahrons23.sg-host.com/sprintings-import/.
+#
+# It copies only the ORIGINAL images the site uses (app/seed/sprintings/media.json → used_on),
+# skipping WordPress's resized copies and the Gotham font files, into app/seed/sprintings/media/,
+# and commits them to the branch the workflow runs on. Uses the same SSH secrets as the deploy.
+name: Fetch Sprintings media
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_dir:
+        description: 'Folder on the server that holds the extracted uploads (relative to the SSH home)'
+        default: 'www/ahrons23.sg-host.com/sprintings-import'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    env:
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_PORT: '18765'
+      SRC: ${{ inputs.source_dir }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare SSH key
+        env:
+          KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          PASSPHRASE: ${{ secrets.SSH_PASSPHRASE }}
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$KEY" | tr -d '\r' > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          if [ -n "$PASSPHRASE" ]; then
+            ssh-keygen -p -q -P "$PASSPHRASE" -N "" -f ~/.ssh/deploy_key
+          fi
+          ssh-keyscan -p "$SSH_PORT" -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          printf 'Host sg\n  HostName %s\n  User %s\n  Port %s\n  IdentityFile ~/.ssh/deploy_key\n  IdentitiesOnly yes\n  StrictHostKeyChecking yes\n' "$SSH_HOST" "$SSH_USER" "$SSH_PORT" > ~/.ssh/config
+
+      - name: Find the uploads on the server
+        run: |
+          ssh sg "test -d '$SRC'" || { echo "::error::Folder $SRC not found on the server. Create it next to public_html and extract the zip there."; exit 1; }
+          echo "Contents of $SRC (top levels):"
+          ssh sg "cd '$SRC' && find . -maxdepth 3 -type d | head -40"
+          # The zip may extract as 2022/…, 22/…, uploads/2022/… or wp-content/uploads/2022/…
+          # Locate the year folder by finding the logo, which lives in <year>/11/.
+          LOGO=$(ssh sg "cd '$SRC' && find . -maxdepth 7 -type f -name 'Sprintings_Logo.png' -path '*/11/*' | head -1")
+          [ -n "$LOGO" ] || { echo "::error::Sprintings_Logo.png not found inside $SRC."; ssh sg "cd '$SRC' && find . -maxdepth 4 | head -60"; exit 1; }
+          YEAR_DIR=$(dirname "$(dirname "$LOGO")")
+          echo "YEAR_DIR=$YEAR_DIR" >> "$GITHUB_ENV"
+          echo "Year folder (2022/) found at $SRC/$YEAR_DIR"
+
+      - name: Copy the original images the site uses
+        run: |
+          python3 - > /tmp/files.txt <<'PY'
+          import json
+          m = json.load(open('app/seed/sprintings/media.json'))
+          files = {a['file'] for a in m['attachments'] if a['used_on'] and not a['file'].lower().endswith(('.ttf', '.otf', '.woff', '.woff2'))}
+          for url in m.get('referenced_but_not_in_library', {}):
+              files.add(url.split('/wp-content/uploads/', 1)[-1])
+          # Paths relative to the 2022/ folder (the server copy may be named differently)
+          print('\n'.join(sorted(f.split('/', 1)[1] for f in files if f.startswith('2022/'))))
+          PY
+          echo "$(wc -l < /tmp/files.txt) files wanted"
+          mkdir -p app/seed/sprintings/media/2022
+          rsync -rtv --files-from=/tmp/files.txt --ignore-missing-args -e ssh "sg:$SRC/$YEAR_DIR/" app/seed/sprintings/media/2022/
+          echo "Copied: $(find app/seed/sprintings/media -type f | wc -l) files, $(du -sh app/seed/sprintings/media | cut -f1)"
+          missing=0
+          while read -r f; do [ -f "app/seed/sprintings/media/2022/$f" ] || { echo "::warning::Not found on the server: $f"; missing=$((missing+1)); }; done < /tmp/files.txt
+          echo "Missing: $missing"
+
+      - name: Commit to the repository
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/seed/sprintings/media
+          if git diff --cached --quiet; then echo "Nothing new to commit."; exit 0; fi
+          git commit -m "Import Sprintings media from SiteGround"
+          git push

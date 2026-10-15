@@ -1,0 +1,107 @@
+{
+  "name": "Sprintings",
+  "tagline": null,
+  "url": "https://sprintings.com",
+  "permalinks": {
+    "pages": "/<parent>/<slug>/",
+    "posts": "/%year%/%monthnum%/%day%/%postname%/"
+  },
+  "business": {
+    "phone": "(562) 294-3207",
+    "email": "sales@sprintings.com",
+    "address": "520 W. Willow Street, 101-F, Long Beach, CA 90806",
+    "hours": {
+      "Monday": "9:00am – 6:00pm",
+      "Tuesday": "9:00am – 6:00pm",
+      "Wednesday": "9:00am – 6:00pm",
+      "Thursday": "9:00am – 6:00pm",
+      "Friday": "9:00am – 4:00pm",
+      "Saturday": "Closed",
+      "Sunday": "Closed"
+    },
+    "social": [
+      "https://www.facebook.com/SPRINTINGCA/",
+      "https://www.instagram.com/sprintingca",
+      "https://linkedin.com/company/sprinting"
+    ],
+    "note": "Phone, email, address, hours and social links are taken verbatim from the site's header, footer and contact sections."
+  },
+  "brand": {
+    "colors": {
+      "Green (teal)": "#246B7F",
+      "Orange": "#F56F46",
+      "Text": "#4D5862",
+      "Black": "#242C33"
+    },
+    "fonts_current": {
+      "headings": "Gotham (commercial licence — do not reuse without a licence)",
+      "body": "Roboto"
+    }
+  },
+  "menus": {
+    "Foot Menu": [
+      {
+        "label": "Home",
+        "url": "/",
+        "parent_item": null,
+        "id": 96
+      },
+      {
+        "label": "About Us",
+        "url": "/about-us/",
+        "parent_item": null,
+        "id": 97
+      },
+      {
+        "label": "Products",
+        "url": "/products/",
+        "parent_item": null,
+        "id": 100
+      },
+      {
+        "label": "Blog",
+        "url": "/blog/",
+        "parent_item": null,
+        "id": 98
+      },
+      {
+        "label": "Contact",
+        "url": "/contact/",
+        "parent_item": null,
+        "id": 99
+      }
+    ],
+    "Head Menu": [
+      {
+        "label": "Home",
+        "url": "/",
+        "parent_item": null,
+        "id": 51
+      },
+      {
+        "label": "About Us",
+        "url": "/about-us/",
+        "parent_item": null,
+        "id": 52
+      },
+      {
+        "label": "Products",
+        "url": "/products/",
+        "parent_item": null,
+        "id": 55
+      },
+      {
+        "label": "Blog",
+        "url": "/blog/",
+        "parent_item": null,
+        "id": 53
+      },
+      {
+        "label": "Contact",
+        "url": "/contact/",
+        "parent_item": null,
+        "id": 54
+      }
+    ]
+  }
+}
