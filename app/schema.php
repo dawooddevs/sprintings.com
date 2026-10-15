@@ -39,6 +39,9 @@ function schema_statements(string $driver): array
             faqs {LONGTEXT} NULL,
             related {TEXT} NULL,
             body_areas VARCHAR(255) NOT NULL DEFAULT '',
+            gallery {TEXT} NULL,
+            specs {LONGTEXT} NULL,
+            quote_form VARCHAR(60) NOT NULL DEFAULT '',
             featured INT NOT NULL DEFAULT 0,
             coming_soon INT NOT NULL DEFAULT 0,
             show_in_menu INT NOT NULL DEFAULT 1,
@@ -88,6 +91,22 @@ function schema_statements(string $driver): array
             is_system INT NOT NULL DEFAULT 0,
             needs_review INT NOT NULL DEFAULT 0,
             sort_order INT NOT NULL DEFAULT 0,
+            status VARCHAR(20) NOT NULL DEFAULT 'published',
+            meta_title VARCHAR(255) NOT NULL DEFAULT '',
+            meta_description {TEXT} NULL,
+            updated_by INT NULL,
+            created_at {DT} NULL,
+            updated_at {DT} NULL",
+        'posts' => "
+            id {ID},
+            slug VARCHAR(190) NOT NULL UNIQUE,
+            title VARCHAR(255) NOT NULL,
+            excerpt {TEXT} NULL,
+            content {LONGTEXT} NULL,
+            image VARCHAR(255) NOT NULL DEFAULT '',
+            category VARCHAR(120) NOT NULL DEFAULT '',
+            published_at {DT} NULL,
+            needs_review INT NOT NULL DEFAULT 0,
             status VARCHAR(20) NOT NULL DEFAULT 'published',
             meta_title VARCHAR(255) NOT NULL DEFAULT '',
             meta_description {TEXT} NULL,
@@ -166,11 +185,21 @@ function schema_statements(string $driver): array
             name VARCHAR(190) NOT NULL DEFAULT '',
             email VARCHAR(190) NOT NULL DEFAULT '',
             phone VARCHAR(60) NOT NULL DEFAULT '',
+            product VARCHAR(190) NOT NULL DEFAULT '',
             data {LONGTEXT} NULL,
             page VARCHAR(255) NOT NULL DEFAULT '',
             ip VARCHAR(64) NOT NULL DEFAULT '',
             status VARCHAR(20) NOT NULL DEFAULT 'new',
             forwarded INT NOT NULL DEFAULT 0,
+            created_at {DT} NULL",
+        'submission_files' => "
+            id {ID},
+            submission_id INT NOT NULL,
+            original_name VARCHAR(255) NOT NULL DEFAULT '',
+            stored_name VARCHAR(120) NOT NULL,
+            mime VARCHAR(120) NOT NULL DEFAULT '',
+            size INT NOT NULL DEFAULT 0,
+            ip VARCHAR(64) NOT NULL DEFAULT '',
             created_at {DT} NULL",
         'activity' => "
             id {ID},
@@ -209,6 +238,9 @@ function schema_statements(string $driver): array
         'CREATE INDEX idx_activity_created ON activity (created_at)',
         'CREATE INDEX idx_login_attempts_ip ON login_attempts (ip, created_at)',
         'CREATE INDEX idx_faqs_grp ON faqs (grp, sort_order)',
+        'CREATE INDEX idx_posts_published ON posts (status, published_at)',
+        'CREATE INDEX idx_submission_files_sub ON submission_files (submission_id)',
+        'CREATE INDEX idx_submission_files_ip ON submission_files (ip, created_at)',
     ];
     if ($driver === 'sqlite') {
         $indexes = array_map(fn($s) => preg_replace('/^CREATE (UNIQUE )?INDEX /', 'CREATE $1INDEX IF NOT EXISTS ', $s), $indexes);
@@ -229,4 +261,31 @@ function schema_install(): void
             throw $e;
         }
     }
+}
+
+/** True when $table already has $column. */
+function schema_has_column(string $table, string $column): bool
+{
+    if (DB::driver() === 'sqlite') {
+        foreach (DB::all('PRAGMA table_info(' . DB::ident($table) . ')') as $c) {
+            if ($c['name'] === $column) {
+                return true;
+            }
+        }
+        return false;
+    }
+    return (bool)DB::val('SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = ? AND column_name = ?', [$table, $column]);
+}
+
+/** Add a column to an existing table unless it is already there. $type uses the same placeholders as the schema. */
+function schema_add_column(string $table, string $column, string $type): bool
+{
+    if (schema_has_column($table, $column)) {
+        return false;
+    }
+    $map = DB::driver() === 'sqlite'
+        ? ['{TEXT}' => 'TEXT', '{LONGTEXT}' => 'TEXT', '{DT}' => 'TEXT']
+        : ['{TEXT}' => 'TEXT', '{LONGTEXT}' => 'LONGTEXT', '{DT}' => 'DATETIME'];
+    DB::pdo()->exec('ALTER TABLE ' . DB::ident($table) . ' ADD COLUMN ' . DB::ident($column) . ' ' . strtr($type, $map));
+    return true;
 }

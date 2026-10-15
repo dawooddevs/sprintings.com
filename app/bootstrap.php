@@ -34,6 +34,7 @@ require APP . '/lib/Html.php';
 require APP . '/lib/Media.php';
 require APP . '/lib/Content.php';
 require APP . '/lib/Seo.php';
+require APP . '/lib/QuoteForms.php';
 
 date_default_timezone_set('America/Los_Angeles'); // Long Beach, CA
 mb_internal_encoding('UTF-8');

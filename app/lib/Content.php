@@ -12,23 +12,25 @@ final class Content
     public const SERVICE_BASE = 'service';
     public const PROVIDER_BASE = 'team';
 
-    /** Product categories (dashboard dropdown, menus, filters). A first proposal; refine it per BRIEF.md. */
+    /** Product categories (dashboard dropdown, mega-menu, products filter and homepage bento). */
     public const CATEGORIES = [
-        'cards' => ['label' => 'Business Cards & Cards', 'short' => 'Cards', 'icon' => 'credit-card', 'blurb' => 'Business cards, magnets, greeting, collectors and specialty cards.'],
-        'marketing' => ['label' => 'Flyers, Brochures & Marketing', 'short' => 'Marketing', 'icon' => 'file-text', 'blurb' => 'Flyers, brochures, postcards, door hangers, rack cards and more.'],
-        'books' => ['label' => 'Booklets, Books & Catalogs', 'short' => 'Books', 'icon' => 'clipboard', 'blurb' => 'Booklets, magazines, catalogs, books, calendars and notepads.'],
-        'labels' => ['label' => 'Stickers, Labels & Tags', 'short' => 'Labels', 'icon' => 'target', 'blurb' => 'Stickers, roll labels, hang tags and special shapes.'],
+        'cards' => ['label' => 'Business Cards & Cards', 'short' => 'Cards', 'icon' => 'credit-card', 'blurb' => 'Business cards, folded and rip cards, magnets, greeting and collectors cards.'],
+        'marketing' => ['label' => 'Flyers, Brochures & Marketing', 'short' => 'Marketing', 'icon' => 'file-text', 'blurb' => 'Flyers, brochures, postcards, door hangers and rack cards.'],
+        'books' => ['label' => 'Booklets, Books & Catalogs', 'short' => 'Books', 'icon' => 'book-open', 'blurb' => 'Booklets, magazines, catalogs, books, calendars, notepads and bookmarks.'],
+        'labels' => ['label' => 'Stickers, Labels & Tags', 'short' => 'Labels', 'icon' => 'tag', 'blurb' => 'Stickers, roll labels, hang tags and special shapes.'],
         'stationery' => ['label' => 'Stationery & Office', 'short' => 'Stationery', 'icon' => 'mail', 'blurb' => 'Letterheads, envelopes and presentation folders.'],
-        'events' => ['label' => 'Events, Invitations & Menus', 'short' => 'Events', 'icon' => 'calendar', 'blurb' => 'Invitations, event tickets, table tents, mini menus and election printing.'],
-        'signage' => ['label' => 'Signage & Banners', 'short' => 'Signage', 'icon' => 'building', 'blurb' => 'Signs, banners and large-format printing.'],
+        'events' => ['label' => 'Events, Invitations & Menus', 'short' => 'Events', 'icon' => 'ticket', 'blurb' => 'Invitations, event tickets, table tents, mini menus and election printing.'],
+        'signage' => ['label' => 'Signage & Banners', 'short' => 'Signage', 'icon' => 'flag', 'blurb' => 'Indoor and outdoor signs and banners.'],
     ];
 
     /** FAQ groups: where a FAQ is shown. Templates read one group with Content::faqs('<key>'). */
     public const FAQ_GROUPS = [
         'home' => 'Homepage',
-        'general' => 'FAQ page / general',
-        'new-patients' => 'New patients',
-        'billing' => 'Billing & insurance',
+        'general' => 'General',
+        'ordering' => 'Ordering',
+        'about' => 'About page',
+        'contact' => 'Contact page',
+        'quote' => 'Request a quote page',
     ];
 
     public const PROVIDER_TYPES = [
@@ -201,28 +203,11 @@ final class Content
     }
 
     /**
-     * Downloadable patient PDFs shown on the appointment page. Each item is linked from its
-     * Settings → Patient forms value, or found in the Media Library by 'file' name. Items with
-     * no file are hidden, and a group with no available items is not shown.
+     * Downloadable files (e.g. price lists or artwork templates) found in the Media Library by 'file'
+     * name or set in Settings → Downloads. Items with no file are hidden. Empty until Sprintings
+     * supplies files; the Downloads settings tab is hidden while this is empty.
      */
-    public const FORM_GROUPS = [
-        'patient' => [
-            'title' => 'Patient Forms', 'icon' => 'clipboard',
-            'text' => 'New patient paperwork. Complete it before your first visit to save time at check-in.',
-            'items' => [
-                ['label' => 'New Patient Form — English', 'file' => 'new-patient-form-english.pdf', 'setting' => 'form_new_patient_en'],
-                ['label' => 'New Patient Form — Spanish', 'file' => 'new-patient-form-spanish.pdf', 'setting' => 'form_new_patient_es'],
-            ],
-        ],
-        'accident' => [
-            'title' => 'Accident Forms', 'icon' => 'car',
-            'text' => 'New patient paperwork with accident information, for car accident and injury visits.',
-            'items' => [
-                ['label' => 'Accident Forms — English', 'file' => 'accident-form-english.pdf', 'setting' => 'form_accident_en'],
-                ['label' => 'Accident Forms — Spanish', 'file' => 'accident-form-spanish.pdf', 'setting' => 'form_accident_es'],
-            ],
-        ],
-    ];
+    public const FORM_GROUPS = [];
 
     private static ?array $formGroups = null;
 
@@ -252,7 +237,7 @@ final class Content
         return self::$formGroups = $groups;
     }
 
-    /** Short list for menus and sidebars: every available patient PDF. */
+    /** Short list for menus and sidebars: every available download. */
     public static function patientForms(): array
     {
         $out = [];
@@ -416,5 +401,126 @@ final class Content
     public static function fullAddress(array $loc): string
     {
         return $loc['address'] . ', ' . $loc['city'] . ', ' . $loc['state'] . ' ' . $loc['zip'];
+    }
+
+    // ------------------------------------------------------------------ Products (extras)
+
+    /** Gallery image paths for a product (main image first when it is not already in the gallery). */
+    public static function gallery(array $s, bool $withMain = true): array
+    {
+        $g = array_values(array_filter(array_map('strval', json_list($s['gallery'] ?? '[]')), fn($p) => $p !== ''));
+        if ($withMain && !empty($s['image']) && !in_array($s['image'], $g, true)) {
+            array_unshift($g, $s['image']);
+        }
+        return $g;
+    }
+
+    /** Specification groups for a product: [['title' => 'Popular Sizes', 'items' => [...]], …]. */
+    public static function specs(array $s): array
+    {
+        $out = [];
+        foreach (json_list($s['specs'] ?? '[]') as $row) {
+            $title = trim((string)($row['title'] ?? ''));
+            $items = is_array($row['items'] ?? null) ? $row['items'] : lines((string)($row['items'] ?? ''));
+            $items = array_values(array_filter(array_map('trim', $items), 'strlen'));
+            if ($title !== '' || $items) {
+                $out[] = ['title' => $title, 'items' => $items];
+            }
+        }
+        return $out;
+    }
+
+    /** Spec items whose group title matches one of $titles (used for quote-form suggestions). */
+    public static function specItems(array $s, array $titles): array
+    {
+        $want = array_map(fn($t) => slugify($t), $titles);
+        $out = [];
+        foreach (self::specs($s) as $g) {
+            if (in_array(slugify($g['title']), $want, true)) {
+                foreach ($g['items'] as $i) {
+                    if (mb_strlen($i) <= 80) $out[] = $i;
+                }
+            }
+        }
+        return array_values(array_unique($out));
+    }
+
+    // ------------------------------------------------------------------ Blog
+
+    public static function posts(int $limit = 0, int $offset = 0, string $category = ''): array
+    {
+        $sql = "SELECT * FROM posts WHERE status = 'published'" . ($category !== '' ? ' AND category = ?' : '') . ' ORDER BY published_at DESC, id DESC';
+        if ($limit > 0) {
+            $sql .= ' LIMIT ' . (int)$limit . ' OFFSET ' . max(0, (int)$offset);
+        }
+        return DB::all($sql, $category !== '' ? [$category] : []);
+    }
+
+    public static function postCount(string $category = ''): int
+    {
+        return (int)DB::val("SELECT COUNT(*) FROM posts WHERE status = 'published'" . ($category !== '' ? ' AND category = ?' : ''), $category !== '' ? [$category] : []);
+    }
+
+    /** Distinct published categories: [slug => label]. */
+    public static function postCategories(): array
+    {
+        $out = [];
+        foreach (DB::all("SELECT DISTINCT category FROM posts WHERE status = 'published' AND category <> '' ORDER BY category") as $r) {
+            $out[slugify($r['category'])] = $r['category'];
+        }
+        return $out;
+    }
+
+    /** A published post by its permalink parts (/YYYY/MM/DD/slug/). */
+    public static function postByPermalink(string $y, string $m, string $d, string $slug): ?array
+    {
+        $p = DB::one("SELECT * FROM posts WHERE slug = ? AND status = 'published'", [$slug]);
+        if (!$p || substr((string)$p['published_at'], 0, 10) !== "$y-$m-$d") {
+            return null;
+        }
+        return $p;
+    }
+
+    public static function postPath(array $p): string
+    {
+        $t = strtotime((string)$p['published_at']) ?: time();
+        return date('Y/m/d', $t) . '/' . $p['slug'] . '/';
+    }
+
+    public static function postUrl(array $p): string
+    {
+        return url(self::postPath($p));
+    }
+
+    public static function readingTime(string $html): int
+    {
+        return max(1, (int)round(str_word_count(strip_tags($html)) / 220));
+    }
+
+    // ------------------------------------------------------------------ Site-wide helpers
+
+    /** The main shop (first published location), or null. */
+    public static function shop(): ?array
+    {
+        return self::locations()[0] ?? null;
+    }
+
+    /** A menu from Settings (one "Label | /path/" per line). */
+    public static function menu(string $key): array
+    {
+        $out = [];
+        foreach (lines((string)setting($key)) as $line) {
+            $parts = array_map('trim', explode('|', $line, 2));
+            if (count($parts) === 2 && $parts[0] !== '' && $parts[1] !== '') {
+                $out[] = ['label' => $parts[0], 'url' => $parts[1]];
+            }
+        }
+        return $out;
+    }
+
+    /** Published reviews (testimonials) with text; featured only for the homepage carousel. */
+    public static function reviews(bool $featuredOnly = false): array
+    {
+        return self::testimonials($featuredOnly);
     }
 }

@@ -1,10 +1,9 @@
 <?php
 /**
- * Seeds the database on a fresh install: services (app/seed/services.php), core pages and
- * redirects. Runs once, from the installer.
+ * Seeds the database on a fresh install: the legal pages and sitemap, then the whole Sprintings
+ * site from the content pack (SprintingsImport). Runs once, from the installer.
  *
- * Providers, locations, testimonials and homepage FAQs start empty. Add them in the
- * dashboard only from information the practice supplies; never invent them.
+ * Never invent content here: everything comes from app/seed/sprintings/.
  */
 function seed_database(): void
 {
@@ -52,8 +51,15 @@ function seed_database(): void
         ], $p, ['sort_order' => ($i + 1) * 10, 'created_at' => $now, 'updated_at' => $now]));
     }
 
-    // Sprintings content (products, pages, posts, location, reviews, menus) is imported from
-    // app/seed/sprintings/ — see BRIEF.md §6. Redirects for the old URLs are listed there too.
+    // ---------- Sprintings content ----------
+    // Products, pages, blog posts, reviews, the shop location, menus, media and redirects from the
+    // content pack in app/seed/sprintings/ (re-runnable locally with app/cli/import-sprintings.php)
+    require_once __DIR__ . '/SprintingsImport.php';
+    foreach ((new SprintingsImport(true))->run() as $line) {
+        if (PHP_SAPI === 'cli') {
+            echo '  ' . $line . "\n";
+        }
+    }
 }
 
 function seed_pages(): array

@@ -1,16 +1,20 @@
 <?php
 /**
- * Native website forms (used when no GoHighLevel embed is configured, and as
- * a reliable fallback). Submissions are stored in the dashboard inbox, emailed
- * to the notification address and optionally forwarded to a GHL webhook.
+ * Website forms: the Sprintings quote forms, contact form and newsletter sign-up (definitions in
+ * QuoteForms.php). Submissions are stored in the dashboard inbox (with any artwork files, kept
+ * outside the public web space), emailed to the notification addresses, answered with an
+ * auto-reply, and optionally forwarded as JSON to a webhook (Settings → Forms & Integrations).
  */
+require_once __DIR__ . '/QuoteForms.php'; // also loaded by bootstrap
+
 final class Forms
 {
-    public const TYPES = [
-        'appointment' => 'Appointment Request',
-        'contact' => 'Contact Message',
-        'benefits' => 'Benefits Check',
-    ];
+    /** Where artwork uploads are stored. app/ is blocked from the web by app/.htaccess. */
+    public const FILES_DIR = STORAGE . '/submissions';
+
+    /** Per-IP limits: submissions per 10 minutes and uploaded bytes per hour. */
+    private const MAX_SUBMISSIONS = 5;
+    private const MAX_UPLOAD_BYTES_PER_HOUR = 300 * 1024 * 1024;
 
     public static function token(): string
     {
@@ -28,49 +32,14 @@ final class Forms
         return $age >= 2 && $age <= 86400;
     }
 
-    public static function concerns(): array
-    {
-        return ['Neck pain', 'Back pain', 'Shoulder pain', 'Hip pain', 'Knee pain', 'Elbow, wrist or hand pain', 'Leg, ankle or foot pain', 'General joint pain', 'Headaches', 'Car accident injury', 'Work injury', 'Sports injury', 'Not sure / other'];
-    }
-
+    /** Field definitions of a form, keyed by field name. */
     public static function fields(string $type): array
     {
-        $locations = array_map(fn($l) => $l['name'], Content::locations());
-        $locations[] = 'No preference';
-        $common = [
-            'first_name' => ['label' => 'First name', 'type' => 'text', 'required' => true, 'autocomplete' => 'given-name', 'half' => true],
-            'last_name' => ['label' => 'Last name', 'type' => 'text', 'required' => true, 'autocomplete' => 'family-name', 'half' => true],
-            'phone' => ['label' => 'Phone', 'type' => 'tel', 'required' => true, 'autocomplete' => 'tel', 'half' => true],
-            'email' => ['label' => 'Email', 'type' => 'email', 'required' => true, 'autocomplete' => 'email', 'half' => true],
-        ];
-        $fields = match ($type) {
-            'appointment' => $common + [
-                'location' => ['label' => 'Preferred location', 'type' => 'select', 'options' => $locations, 'required' => true, 'half' => true],
-                'patient_status' => ['label' => 'New or current patient', 'type' => 'select', 'options' => ['New patient', 'Current patient'], 'required' => true, 'half' => true],
-                'concern' => ['label' => 'Main concern', 'type' => 'select', 'options' => self::concerns(), 'required' => true, 'half' => true],
-                'insurance' => ['label' => 'Insurance (carrier & plan)', 'type' => 'text', 'placeholder' => 'Optional', 'half' => true],
-                'preferred_day' => ['label' => 'Preferred day', 'type' => 'select', 'options' => ['First available', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], 'half' => true],
-                'preferred_time' => ['label' => 'Preferred time', 'type' => 'select', 'options' => ['Any time', 'Morning', 'Midday', 'Afternoon'], 'half' => true],
-                'message' => ['label' => 'Anything else we should know?', 'type' => 'textarea', 'placeholder' => 'Briefly, how can we help? Please don\'t include detailed medical information.'],
-            ],
-            'benefits' => $common + [
-                'insurance' => ['label' => 'Insurance carrier', 'type' => 'text', 'required' => true, 'placeholder' => 'e.g. Blue Cross, Aetna', 'half' => true],
-                'location' => ['label' => 'Preferred location', 'type' => 'select', 'options' => $locations, 'half' => true],
-                'message' => ['label' => 'What would you like to know?', 'type' => 'textarea', 'placeholder' => 'Optional'],
-            ],
-            default => [
-                'first_name' => $common['first_name'], 'last_name' => $common['last_name'],
-                'phone' => ['label' => 'Phone', 'type' => 'tel', 'required' => true, 'autocomplete' => 'tel', 'half' => true],
-                'email' => ['label' => 'Email', 'type' => 'email', 'autocomplete' => 'email', 'half' => true],
-                'location' => ['label' => 'Location', 'type' => 'select', 'options' => $locations],
-                'message' => ['label' => 'Message', 'type' => 'textarea', 'required' => true, 'placeholder' => 'How can we help? Please don\'t include detailed medical information.'],
-            ],
-        };
-        // A location choice only makes sense once offices are added in the dashboard
-        if (count($locations) < 2) {
-            unset($fields['location']);
+        $out = [];
+        foreach (QuoteForms::get($type)['fields'] ?? [] as $f) {
+            $out[$f['name']] = $f;
         }
-        return $fields;
+        return $out;
     }
 
     public static function handle(): void
@@ -81,28 +50,48 @@ final class Forms
                 json_out(['ok' => false, 'error' => $msg], $code);
             }
             http_response_code($code);
-            echo '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><body style="font-family:system-ui;max-width:560px;margin:4rem auto;padding:0 1rem"><h1>We couldn\'t send your request</h1><p>' . e($msg) . '</p><p><a href="javascript:history.back()">Go back</a> or call <a href="' . e(tel_href(setting('phone'))) . '">' . e(setting('phone')) . '</a>.</p>';
+            header('Content-Type: text/html; charset=utf-8');
+            $phone = (string)setting('phone');
+            echo '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><meta name="robots" content="noindex"><title>We couldn\'t send your request</title><body style="font-family:system-ui,sans-serif;max-width:560px;margin:4rem auto;padding:0 1rem;color:#242c33"><h1>We couldn\'t send your request</h1><p>' . e($msg) . '</p><p><a href="javascript:history.back()">Go back</a>' . ($phone ? ' or call <a href="' . e(tel_href($phone)) . '">' . e($phone) . '</a>' : '') . '.</p>';
             exit;
         };
         if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
             $fail('Invalid request.', 405);
         }
-        $type = (string)($_POST['_form'] ?? 'contact');
-        if (!isset(self::TYPES[$type])) {
+        // A POST larger than post_max_size arrives with empty $_POST and $_FILES
+        $len = (int)($_SERVER['CONTENT_LENGTH'] ?? 0);
+        if (!$_POST && $len > 0) {
+            $fail('Your files are too large to send in one go. Please send up to ' . QuoteForms::UPLOAD_MAX_FILES . ' files of up to 50 MB each, or email them to ' . setting('email') . '.', 413);
+        }
+        $type = (string)($_POST['_form'] ?? '');
+        $def = QuoteForms::get($type);
+        if (!$def) {
             $fail('Unknown form.');
         }
-        // Spam protection: honeypot + signed timestamp + rate limit
+        // Spam protection: honeypot + signed timestamp + rate limits
         if (!empty($_POST['website']) || !self::validToken((string)($_POST['_token'] ?? ''))) {
             $fail('Your session expired. Please refresh the page and try again.');
         }
         $since = date('Y-m-d H:i:s', time() - 600);
-        if ((int)DB::val('SELECT COUNT(*) FROM submissions WHERE ip = ? AND created_at > ?', [client_ip(), $since]) >= 5) {
+        if ((int)DB::val('SELECT COUNT(*) FROM submissions WHERE ip = ? AND created_at > ?', [client_ip(), $since]) >= self::MAX_SUBMISSIONS) {
             $fail('Too many requests. Please call us instead.', 429);
         }
+
+        $product = null;
+        if (($slug = (string)($_POST['_product'] ?? '')) !== '' && preg_match('/^[a-z0-9\-]+$/', $slug)) {
+            $product = Content::service($slug);
+        }
+
         $data = [];
-        foreach (self::fields($type) as $name => $f) {
+        $fileField = null;
+        foreach ($def['fields'] as $f) {
+            $name = $f['name'];
+            if ($f['type'] === 'file') {
+                $fileField = $f;
+                continue;
+            }
             $v = trim((string)($_POST[$name] ?? ''));
-            $v = mb_substr(strip_tags($v), 0, $f['type'] === 'textarea' ? 3000 : 200);
+            $v = mb_substr(strip_tags($v), 0, $f['type'] === 'textarea' ? 5000 : 250);
             if (!empty($f['required']) && $v === '') {
                 $fail('Please complete the "' . $f['label'] . '" field.');
             }
@@ -110,47 +99,205 @@ final class Forms
                 $fail('Please enter a valid email address.');
             }
             if ($f['type'] === 'tel' && $v !== '' && strlen(digits($v)) < 10) {
-                $fail('Please enter a valid phone number.');
+                $fail('Please enter a valid phone number, including the area code.');
             }
-            if ($f['type'] === 'select' && $v !== '' && !in_array($v, $f['options'], true)) {
-                $v = '';
+            if ($f['type'] === 'number' && $v !== '' && !is_numeric($v)) {
+                $fail('Please enter a number in the "' . $f['label'] . '" field.');
             }
             $data[$name] = $v;
         }
-        if (empty($_POST['consent'])) {
+        if (!empty($def['consent']) && empty($_POST['consent'])) {
             $fail('Please confirm we may contact you about your request.');
         }
-        $data['consent'] = 'Yes';
+
+        // Artwork files: validate everything before anything is stored
+        $files = $fileField ? self::collectFiles($fail) : [];
+        if ($files) {
+            $bytes = array_sum(array_column($files, 'size'));
+            $recent = (int)DB::val('SELECT COALESCE(SUM(size),0) FROM submission_files WHERE ip = ? AND created_at > ?', [client_ip(), date('Y-m-d H:i:s', time() - 3600)]);
+            if ($recent + $bytes > self::MAX_UPLOAD_BYTES_PER_HOUR) {
+                $fail('You have uploaded a lot of files in the last hour. Please email your artwork to ' . setting('email') . ' instead.', 429);
+            }
+        }
+
+        $name = trim((string)($data['name'] ?? trim(($data['first_name'] ?? '') . ' ' . ($data['last_name'] ?? ''))));
         $page = mb_substr((string)($_POST['_page'] ?? ''), 0, 250);
-        $name = trim(($data['first_name'] ?? '') . ' ' . ($data['last_name'] ?? ''));
+        $productTitle = $product ? (string)$product['title'] : '';
         $id = DB::insert('submissions', [
             'form' => $type,
-            'name' => $name,
+            'name' => mb_substr($name, 0, 190),
             'email' => $data['email'] ?? '',
             'phone' => $data['phone'] ?? '',
+            'product' => mb_substr($productTitle, 0, 190),
             'data' => json_encode($data, JSON_UNESCAPED_UNICODE),
             'page' => $page,
             'ip' => client_ip(),
             'status' => 'new',
             'created_at' => now(),
         ]);
-        $forwarded = self::forward($type, $data, $page);
-        if ($forwarded) {
+        $stored = self::storeFiles($id, $files);
+        if (count($stored) < count($files)) {
+            log_error('Form ' . $type . ' #' . $id . ': ' . (count($files) - count($stored)) . ' file(s) could not be saved');
+        }
+
+        if (self::forward($type, $def, $data, $page, $productTitle, $stored)) {
             DB::update('submissions', ['forwarded' => 1], 'id = ?', [$id]);
         }
-        self::notify($type, $data, $page);
-
-        $msg = $type === 'appointment'
-            ? 'Thank you! Your request has been received. Our team will contact you to confirm your appointment time.'
-            : 'Thank you! Your message has been received. Our team will be in touch shortly.';
-        if ($isAjax) {
-            json_out(['ok' => true, 'message' => $msg]);
+        self::notify($id, $type, $def, $data, $page, $productTitle, $stored);
+        if ($def['kind'] !== 'newsletter') {
+            self::autoReply($data);
         }
-        $back = $page && str_starts_with($page, '/') ? $page : url('');
-        redirect($back . (str_contains($back, '?') ? '&' : '?') . 'sent=1#form');
+
+        $thanks = url('thank-you/');
+        if ($isAjax) {
+            json_out(['ok' => true, 'message' => $def['success'], 'redirect' => $def['kind'] === 'newsletter' ? '' : $thanks]);
+        }
+        redirect($thanks . ($def['kind'] === 'newsletter' ? '?signup=1' : ''), 303);
     }
 
-    private static function forward(string $type, array $data, string $page): bool
+    /** Validated uploads from $_FILES['files'] (multiple). */
+    private static function collectFiles(callable $fail): array
+    {
+        $in = $_FILES['files'] ?? null;
+        if (!$in || !isset($in['name'])) {
+            return [];
+        }
+        $names = (array)$in['name'];
+        $out = [];
+        foreach ($names as $i => $orig) {
+            $err = (int)((array)$in['error'])[$i];
+            if ($err === UPLOAD_ERR_NO_FILE || (string)$orig === '') {
+                continue;
+            }
+            $orig = mb_substr(basename(str_replace('\\', '/', (string)$orig)), 0, 250);
+            if ($err === UPLOAD_ERR_INI_SIZE || $err === UPLOAD_ERR_FORM_SIZE) {
+                $fail('"' . $orig . '" is larger than 50 MB.', 413);
+            }
+            if ($err !== UPLOAD_ERR_OK) {
+                $fail('"' . $orig . '" did not upload completely. Please try again.');
+            }
+            $tmp = (string)((array)$in['tmp_name'])[$i];
+            $size = (int)((array)$in['size'])[$i];
+            if (!is_uploaded_file($tmp)) {
+                $fail('Upload failed. Please try again.');
+            }
+            if ($size > QuoteForms::UPLOAD_MAX_BYTES) {
+                $fail('"' . $orig . '" is larger than 50 MB.', 413);
+            }
+            $ext = strtolower(pathinfo($orig, PATHINFO_EXTENSION));
+            if (!isset(QuoteForms::UPLOAD_TYPES[$ext])) {
+                $fail('"' . $orig . '" is not an accepted file type. Please send PDF, AI, EPS, PSD, PNG, JPG, TIFF or ZIP files.');
+            }
+            $mime = self::detectMime($tmp);
+            if (!in_array($mime, QuoteForms::UPLOAD_TYPES[$ext], true)) {
+                $fail('"' . $orig . '" does not look like a valid .' . $ext . ' file.');
+            }
+            $out[] = ['tmp' => $tmp, 'name' => $orig, 'ext' => $ext, 'mime' => $mime, 'size' => $size];
+            if (count($out) > QuoteForms::UPLOAD_MAX_FILES) {
+                $fail('Please send no more than ' . QuoteForms::UPLOAD_MAX_FILES . ' files. Zip them together, or email them to ' . setting('email') . '.');
+            }
+        }
+        return $out;
+    }
+
+    private static function detectMime(string $file): string
+    {
+        if (class_exists('finfo')) {
+            $m = (string)(new finfo(FILEINFO_MIME_TYPE))->file($file);
+        } elseif (function_exists('mime_content_type')) {
+            $m = (string)@mime_content_type($file);
+        } else {
+            $m = 'application/octet-stream';
+        }
+        return strtolower($m);
+    }
+
+    /** Move validated uploads to app/storage/submissions/YYYY/MM/<random>.<ext> and record them. */
+    private static function storeFiles(int $submissionId, array $files): array
+    {
+        $stored = [];
+        if (!$files) {
+            return $stored;
+        }
+        $sub = date('Y/m');
+        $dir = self::FILES_DIR . '/' . $sub;
+        if (!is_dir($dir) && !@mkdir($dir, 0750, true)) {
+            log_error('Could not create ' . $dir);
+            return $stored;
+        }
+        foreach ($files as $f) {
+            $rel = $sub . '/' . bin2hex(random_bytes(16)) . '.' . $f['ext'];
+            if (!move_uploaded_file($f['tmp'], self::FILES_DIR . '/' . $rel)) {
+                continue;
+            }
+            @chmod(self::FILES_DIR . '/' . $rel, 0640);
+            $fid = DB::insert('submission_files', [
+                'submission_id' => $submissionId,
+                'original_name' => $f['name'],
+                'stored_name' => $rel,
+                'mime' => $f['mime'],
+                'size' => $f['size'],
+                'ip' => client_ip(),
+                'created_at' => now(),
+            ]);
+            $stored[] = ['id' => $fid, 'name' => $f['name'], 'size' => $f['size']];
+        }
+        return $stored;
+    }
+
+    /** Absolute path of a stored upload, or null if missing or outside the uploads folder. */
+    public static function filePath(array $row): ?string
+    {
+        $rel = (string)$row['stored_name'];
+        if (!preg_match('~^\d{4}/\d{2}/[a-f0-9]{32}\.[a-z0-9]{2,5}$~', $rel)) {
+            return null;
+        }
+        $p = self::FILES_DIR . '/' . $rel;
+        return is_file($p) ? $p : null;
+    }
+
+    /** Delete a submission's stored files and their rows. */
+    public static function deleteFiles(int $submissionId): int
+    {
+        $n = 0;
+        foreach (DB::all('SELECT * FROM submission_files WHERE submission_id = ?', [$submissionId]) as $r) {
+            if ($p = self::filePath($r)) {
+                @unlink($p);
+            }
+            $n += DB::delete('submission_files', 'id = ?', [$r['id']]);
+        }
+        return $n;
+    }
+
+    public static function fileUrl(int $fileId): string
+    {
+        return abs_url('admin/api.php?r=submissions.file&id=' . $fileId);
+    }
+
+    /** Recipients from a comma/semicolon separated list (only valid addresses). */
+    public static function recipients(string $list): array
+    {
+        $out = [];
+        foreach (preg_split('/[,;]+/', $list) as $a) {
+            $a = trim($a);
+            if ($a !== '' && filter_var($a, FILTER_VALIDATE_EMAIL)) {
+                $out[strtolower($a)] = $a;
+            }
+        }
+        return array_values($out);
+    }
+
+    private static function label(string $key, array $def): string
+    {
+        foreach ($def['fields'] as $f) {
+            if ($f['name'] === $key) {
+                return $f['label'];
+            }
+        }
+        return ucwords(str_replace('_', ' ', $key));
+    }
+
+    private static function forward(string $type, array $def, array $data, string $page, string $product, array $files): bool
     {
         $hook = trim((string)setting('ghl_webhook_url'));
         if ($hook === '' || !preg_match('~^https://~', $hook) || !function_exists('curl_init')) {
@@ -158,8 +305,10 @@ final class Forms
         }
         $payload = array_merge($data, [
             'form' => $type,
-            'form_name' => self::TYPES[$type],
-            'full_name' => trim(($data['first_name'] ?? '') . ' ' . ($data['last_name'] ?? '')),
+            'form_name' => $def['title'],
+            'product' => $product,
+            'full_name' => trim((string)($data['name'] ?? trim(($data['first_name'] ?? '') . ' ' . ($data['last_name'] ?? '')))),
+            'files' => array_map(fn($f) => ['name' => $f['name'], 'url' => self::fileUrl($f['id'])], $files),
             'source' => 'Website',
             'page' => abs_url($page ?: '/'),
             'submitted_at' => date('c'),
@@ -179,27 +328,68 @@ final class Forms
         return $code >= 200 && $code < 300;
     }
 
-    private static function notify(string $type, array $data, string $page): void
+    private static function fromHeader(): string
     {
-        $to = trim((string)setting('notify_email'));
-        if ($to === '' || !function_exists('mail')) {
+        $host = preg_replace('/^www\./', '', parse_url(site_origin(), PHP_URL_HOST) ?: 'localhost');
+        $name = preg_replace('/[^\w .&\'-]/u', '', (string)setting('site_short_name')) ?: 'Website';
+        return 'From: ' . $name . ' <noreply@' . $host . '>';
+    }
+
+    private static function notify(int $id, string $type, array $def, array $data, string $page, string $product, array $files): void
+    {
+        $to = self::recipients((string)setting('notify_email'));
+        if (!$to || !function_exists('mail')) {
             return;
         }
         $lines = [];
-        foreach ($data as $k => $v) {
-            $lines[] = ucwords(str_replace('_', ' ', $k)) . ': ' . $v;
+        if ($product !== '') {
+            $lines[] = 'Product: ' . $product;
         }
-        $lines[] = 'Page: ' . abs_url($page ?: '/');
+        foreach ($data as $k => $v) {
+            if ($v !== '') {
+                $lines[] = self::label($k, $def) . ': ' . $v;
+            }
+        }
+        if ($files) {
+            $lines[] = '';
+            $lines[] = 'Artwork files (sign in to the dashboard to download):';
+            foreach ($files as $f) {
+                $lines[] = '- ' . $f['name'] . ' (' . number_format($f['size'] / 1048576, 1) . ' MB): ' . self::fileUrl($f['id']);
+            }
+        }
         $lines[] = '';
-        $lines[] = 'View in dashboard: ' . abs_url('admin/#/submissions');
-        $host = preg_replace('/^www\./', '', parse_url(site_origin(), PHP_URL_HOST) ?: 'localhost');
-        $headers = [
-            'From: ' . setting('site_short_name') . ' Website <noreply@' . $host . '>',
-            'Content-Type: text/plain; charset=UTF-8',
-        ];
+        $lines[] = 'Page: ' . abs_url($page ?: '/');
+        $lines[] = 'View in dashboard: ' . abs_url('admin/#/submissions/' . $id);
+        $subject = $def['kind'] === 'quote'
+            ? 'New Quote Request — ' . $def['title'] . ($product !== '' ? ' (' . $product . ')' : '')
+            : 'New submission from ' . $def['title'];
+        $headers = [self::fromHeader(), 'Content-Type: text/plain; charset=UTF-8'];
         if (!empty($data['email']) && filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
             $headers[] = 'Reply-To: ' . $data['email'];
         }
-        @mail($to, 'New ' . self::TYPES[$type] . ' — ' . setting('site_short_name'), implode("\n", $lines), implode("\r\n", $headers));
+        @mail(implode(', ', $to), self::encodeSubject($subject), implode("\n", $lines), implode("\r\n", $headers));
+    }
+
+    /** The customer auto-reply that Gravity Forms used to send. */
+    private static function autoReply(array $data): void
+    {
+        $email = (string)($data['email'] ?? '');
+        if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || !function_exists('mail')) {
+            return;
+        }
+        $body = "Thank you for contacting us! We will get in touch with you shortly.\n\n"
+            . setting('site_name') . ' — ' . setting('tagline') . "\n"
+            . setting('phone') . ' · ' . setting('email') . "\n" . abs_url('');
+        $headers = [self::fromHeader(), 'Content-Type: text/plain; charset=UTF-8'];
+        $reply = self::recipients((string)setting('email'));
+        if ($reply) {
+            $headers[] = 'Reply-To: ' . $reply[0];
+        }
+        @mail($email, self::encodeSubject('We have received your inquiry'), $body, implode("\r\n", $headers));
+    }
+
+    private static function encodeSubject(string $s): string
+    {
+        return preg_match('/[^\x20-\x7e]/', $s) ? '=?UTF-8?B?' . base64_encode($s) . '?=' : $s;
     }
 }

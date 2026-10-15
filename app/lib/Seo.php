@@ -77,61 +77,68 @@ final class Seo
         return implode("\n  ", $h);
     }
 
+    /** LocalBusiness schema for the print shop: address, geo and opening hours come from the shop location. */
     public static function organization(): array
     {
-        $locs = [];
-        foreach (Content::locations() as $l) {
-            $hours = [];
-            foreach (Content::hours($l) as $row) {
-                if (!empty($row['schema'])) {
-                    foreach ((array)$row['schema'] as $spec) {
-                        $hours[] = $spec;
-                    }
-                }
-            }
-            $loc = [
-                '@type' => ['MedicalClinic', 'LocalBusiness'],
-                '@id' => abs_url('locations/') . '#' . $l['slug'],
-                'name' => setting('site_short_name') . ' — ' . $l['name'],
-                'telephone' => '+1-' . setting('phone'),
-                'address' => [
-                    '@type' => 'PostalAddress',
-                    'streetAddress' => $l['address'],
-                    'addressLocality' => $l['city'],
-                    'addressRegion' => $l['state'],
-                    'postalCode' => $l['zip'],
-                    'addressCountry' => 'US',
-                ],
-                'url' => abs_url('locations/'),
-            ];
-            if ($l['fax']) {
-                $loc['faxNumber'] = '+1-' . $l['fax'];
-            }
-            if ($hours) {
-                $loc['openingHours'] = $hours;
-            }
-            if ($l['latitude'] && $l['longitude']) {
-                $loc['geo'] = ['@type' => 'GeoCoordinates', 'latitude' => $l['latitude'], 'longitude' => $l['longitude']];
-            }
-            $locs[] = $loc;
-        }
-        $same = array_values(array_filter([setting('social_facebook'), setting('social_x'), setting('social_instagram')]));
+        $shop = Content::shop();
+        $same = array_values(array_filter([setting('social_facebook'), setting('social_instagram'), setting('social_linkedin'), setting('social_x'), setting('reviews_url')]));
         $org = [
             '@context' => 'https://schema.org',
-            '@type' => ['MedicalBusiness', 'MedicalOrganization'],
+            '@type' => 'LocalBusiness',
             '@id' => abs_url('') . '#organization',
             'name' => setting('site_name'),
-            'alternateName' => setting('site_short_name'),
+            'alternateName' => setting('site_short_name') !== setting('site_name') ? setting('site_short_name') : '',
+            'slogan' => setting('tagline'),
             'description' => setting('brand_description'),
             'url' => abs_url(''),
             'telephone' => preg_replace('/^tel:/', '', tel_href((string)setting('phone'))),
-            'foundingDate' => setting('founded_year'),
+            'email' => setting('email'),
             'areaServed' => array_map(fn($c) => ['@type' => 'City', 'name' => $c], csv_list(setting('communities'))),
-            'location' => $locs,
         ];
+        if ($shop) {
+            $org['address'] = [
+                '@type' => 'PostalAddress',
+                'streetAddress' => $shop['address'],
+                'addressLocality' => $shop['city'],
+                'addressRegion' => $shop['state'],
+                'postalCode' => $shop['zip'],
+                'addressCountry' => 'US',
+            ];
+            if ($shop['latitude'] !== '' && $shop['longitude'] !== '') {
+                $org['geo'] = ['@type' => 'GeoCoordinates', 'latitude' => (float)$shop['latitude'], 'longitude' => (float)$shop['longitude']];
+            }
+            $hours = [];
+            $days = ['Mo' => 'Monday', 'Tu' => 'Tuesday', 'We' => 'Wednesday', 'Th' => 'Thursday', 'Fr' => 'Friday', 'Sa' => 'Saturday', 'Su' => 'Sunday'];
+            foreach (Content::hours($shop) as $row) {
+                foreach ((array)($row['schema'] ?? []) as $spec) {
+                    if (preg_match('/^([A-Za-z,\-]+)\s+(\d{1,2}:\d{2})-(\d{1,2}:\d{2})$/', trim($spec), $m)) {
+                        $list = [];
+                        foreach (explode(',', $m[1]) as $part) {
+                            $r = explode('-', $part);
+                            $keys = array_keys($days);
+                            $a = array_search($r[0], $keys, true);
+                            $b = array_search($r[1] ?? $r[0], $keys, true);
+                            if ($a === false || $b === false) continue;
+                            for ($d = $a; $d <= $b; $d++) $list[] = $days[$keys[$d]];
+                        }
+                        if ($list) {
+                            $hours[] = ['@type' => 'OpeningHoursSpecification', 'dayOfWeek' => $list, 'opens' => $m[2], 'closes' => $m[3]];
+                        }
+                    }
+                }
+            }
+            if ($hours) {
+                $org['openingHoursSpecification'] = $hours;
+            }
+            if ($shop['image'] ?? '') {
+                $org['image'] = abs_url((string)$shop['image']);
+            }
+            $org['hasMap'] = Content::mapsDirections($shop);
+        }
         $org = array_filter($org, fn($v) => $v !== '' && $v !== null && $v !== []);
         if (setting('logo')) {
             $org['logo'] = abs_url(setting('logo'));
+            $org['image'] = $org['image'] ?? abs_url(setting('logo'));
         }
         if ($same) {
             $org['sameAs'] = $same;

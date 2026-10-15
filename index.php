@@ -113,9 +113,31 @@ if (!$segments) {
         $view = 'pages/provider';
         $vars['provider'] = $p;
     }
+} elseif (count($segments) === 4 && preg_match('~^\d{4}$~', $segments[0]) && preg_match('~^\d{2}$~', $segments[1]) && preg_match('~^\d{2}$~', $segments[2]) && preg_match('/^[a-z0-9\-]+$/', $segments[3])) {
+    // Blog post: /YYYY/MM/DD/slug/ (the WordPress permalinks)
+    if ($post = Content::postByPermalink($segments[0], $segments[1], $segments[2], $segments[3])) {
+        $view = 'pages/post';
+        $vars['post'] = $post;
+    }
+} elseif ($segments[0] === 'blog' && count($segments) === 2 && $segments[1] === 'feed') {
+    header('Content-Type: application/rss+xml; charset=utf-8');
+    echo render('feed-xml');
+    exit;
+} elseif ($segments[0] === 'blog' && count($segments) === 3 && $segments[1] === 'page' && ctype_digit($segments[2]) && (int)$segments[2] > 1) {
+    if ($page = Content::page('blog')) {
+        $view = 'pages/blog';
+        $vars['page'] = $page;
+        $vars['pageNo'] = (int)$segments[2];
+    }
+} elseif ($segments[0] === 'category' && count($segments) === 2 && count(Content::postCategories()) > 1 && isset(Content::postCategories()[$segments[1]])) {
+    if ($page = Content::page('blog')) {
+        $view = 'pages/blog';
+        $vars['page'] = $page;
+        $vars['category'] = $segments[1];
+    }
 } elseif (count($segments) === 1 && preg_match('/^[a-z0-9\-]+$/', $segments[0])) {
     if ($page = Content::page($segments[0])) {
-        $templates = ['treatments', 'appointment', 'contact', 'sitemap', 'legal'];
+        $templates = ['treatments', 'appointment', 'contact', 'sitemap', 'legal', 'about', 'blog', 'thanks'];
         $view = 'pages/' . (in_array($page['template'], $templates, true) ? $page['template'] : 'page');
         $vars['page'] = $page;
     }
@@ -131,8 +153,12 @@ if (!$view && isset($_GET['preview']) && $segments) {
         } elseif ($segments[0] === Content::PROVIDER_BASE && isset($segments[1]) && ($p = DB::one('SELECT * FROM providers WHERE slug = ?', [$segments[1]]))) {
             $view = 'pages/provider';
             $vars['provider'] = $p;
+        } elseif (count($segments) === 4 && ($post = DB::one('SELECT * FROM posts WHERE slug = ?', [$segments[3]]))) {
+            $view = 'pages/post';
+            $vars['post'] = $post;
         } elseif ($page = DB::one('SELECT * FROM pages WHERE slug = ?', [$segments[0]])) {
-            $view = 'pages/page';
+            $templates = ['treatments', 'appointment', 'contact', 'sitemap', 'legal', 'about', 'blog', 'thanks'];
+            $view = 'pages/' . (in_array($page['template'], $templates, true) ? $page['template'] : 'page');
             $vars['page'] = $page;
         }
         Seo::$noindex = true;

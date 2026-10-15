@@ -7,7 +7,8 @@
 #   SSH_PASSPHRASE   the password you set when generating the key (leave unset if none)
 #   SSH_DIR          optional, defaults to www/ahrons23.sg-host.com/public_html/
 #
-# Never uploads or deletes: app/config.php, database/logs/sessions in app/storage, media in uploads/.
+# Never uploads or deletes: app/config.php, database/logs/sessions and customer artwork
+# (app/storage/submissions/) in app/storage, media in uploads/.
 # After uploading, pending content migrations (app/migrations/) are run once on the server.
 #
 # First deploy: run the workflow with "first_deploy" ticked. That skips the check that the
@@ -98,6 +99,7 @@ jobs:
             --exclude '/app/storage/*.sqlite*' \
             --exclude '/app/storage/*.log' \
             --exclude '/app/storage/sessions/' \
+            --exclude '/app/storage/submissions/' \
             --exclude '/uploads/20*/' \
             -e ssh ./ "sg:$SSH_DIR"
 

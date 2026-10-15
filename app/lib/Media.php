@@ -148,6 +148,70 @@ final class Media
         return $row;
     }
 
+    /**
+     * Import a file that is already on the server (e.g. the seed images) into the library, with the
+     * same processing as an upload: copied to uploads/YYYY/MM/, WebP version, thumbnail and dimensions.
+     * Returns the media row; an existing row with the same original name and folder is reused.
+     */
+    public static function importLocal(string $path, string $folder = '', string $alt = '', string $title = ''): array
+    {
+        if (!is_file($path)) {
+            throw new RuntimeException('File not found: ' . basename($path));
+        }
+        $original = basename($path);
+        $folderKey = substr(slugify($folder), 0, 80);
+        if ($row = DB::one('SELECT * FROM media WHERE original_name = ? AND folder = ?', [$original, $folderKey])) {
+            if (is_file(ROOT . '/' . $row['path'])) {
+                return $row;
+            }
+            DB::delete('media', 'id = ?', [$row['id']]); // file was removed: import it again
+        }
+        $ext = strtolower(pathinfo($original, PATHINFO_EXTENSION));
+        if (!isset(self::TYPES[$ext])) {
+            throw new RuntimeException('File type .' . $ext . ' is not allowed.');
+        }
+        [$mime, $kind] = self::TYPES[$ext];
+        $sub = 'uploads/' . date('Y/m');
+        $dir = ROOT . '/' . $sub;
+        if (!is_dir($dir) && !mkdir($dir, 0755, true)) {
+            throw new RuntimeException('Could not create the uploads folder. Check permissions on /uploads.');
+        }
+        $base = substr(slugify(pathinfo($original, PATHINFO_FILENAME)) ?: 'file', 0, 60);
+        $name = $base . '.' . $ext;
+        $i = 1;
+        while (file_exists($dir . '/' . $name)) {
+            $name = $base . '-' . (++$i) . '.' . $ext;
+        }
+        $dest = $dir . '/' . $name;
+        if (!copy($path, $dest)) {
+            throw new RuntimeException('Could not copy ' . $original . ' into /uploads.');
+        }
+        @chmod($dest, 0644);
+        $row = [
+            'path' => $sub . '/' . $name,
+            'webp' => '',
+            'thumb' => '',
+            'original_name' => mb_substr($original, 0, 250),
+            'mime' => $mime,
+            'kind' => $kind,
+            'size' => (int)filesize($dest),
+            'width' => 0,
+            'height' => 0,
+            'alt' => mb_substr($alt, 0, 250),
+            'title' => mb_substr($title !== '' ? $title : ucwords(str_replace('-', ' ', $base)), 0, 250),
+            'folder' => $folderKey,
+            'uploaded_by' => null,
+            'created_at' => now(),
+        ];
+        if ($kind === 'image') {
+            $row = array_merge($row, self::processImage($dest, $sub, pathinfo($name, PATHINFO_FILENAME), $ext));
+            $row['size'] = (int)filesize($dest);
+        }
+        $row['id'] = DB::insert('media', $row);
+        self::$map = null;
+        return $row;
+    }
+
     private static function processImage(string $file, string $sub, string $base, string $ext): array
     {
         $out = ['width' => 0, 'height' => 0, 'webp' => '', 'thumb' => ''];
@@ -249,6 +313,7 @@ final class Media
     private const REF_COLUMNS = [
         ['services', 'image', 'title'],
         ['pages', 'image', 'title'],
+        ['posts', 'image', 'title'],
         ['providers', 'photo', 'name'],
         ['locations', 'image', 'name'],
     ];
@@ -265,6 +330,13 @@ final class Media
         }
         foreach (DB::all('SELECT k FROM settings WHERE v = ?', [$old]) as $r) {
             Settings::set($r['k'], $new);
+            $n++;
+        }
+        // Product galleries hold JSON lists of paths
+        foreach (DB::all('SELECT id, gallery FROM services WHERE gallery LIKE ?', ['%' . $old . '%']) as $r) {
+            $g = json_list((string)$r['gallery']);
+            $g = array_values(array_filter(array_map(fn($p) => $p === $old ? $new : $p, $g), fn($p) => $p !== ''));
+            DB::update('services', ['gallery' => json_encode($g, JSON_UNESCAPED_SLASHES), 'updated_at' => now()], 'id = ?', [$r['id']]);
             $n++;
         }
         return $n;
@@ -330,7 +402,7 @@ final class Media
         };
         $site = setting('site_short_name');
         foreach (DB::all('SELECT id, slug, title, menu_label, image FROM services ORDER BY sort_order') as $r) {
-            $add('Treatment', $r['title'], (string)$r['image'], $find([$r['slug'], $r['title'], $r['menu_label']]), function ($m) use ($r, $alt, $site) {
+            $add('Product', $r['title'], (string)$r['image'], $find([$r['slug'], $r['title'], $r['menu_label']]), function ($m) use ($r, $alt, $site) {
                 DB::update('services', ['image' => $m['path'], 'updated_at' => now()], 'id = ?', [$r['id']]);
                 $alt($m, $r['title'] . ' at ' . $site);
             });

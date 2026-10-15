@@ -5,6 +5,7 @@
  */
 require dirname(__DIR__) . '/app/bootstrap.php';
 require APP . '/lib/Resources.php';
+require APP . '/lib/Forms.php';
 
 if (!is_installed()) {
     json_out(['ok' => false, 'error' => 'Not installed'], 503);
@@ -57,7 +58,7 @@ function resource(string $type): array
 if ($method === 'POST' && $route !== 'auth.login' && !Auth::checkCsrf($_SERVER['HTTP_X_CSRF_TOKEN'] ?? ($in['_csrf'] ?? null))) {
     fail('Security token expired. Please reload the page.', 419);
 }
-if ($method !== 'POST' && !in_array($route, ['auth.me', 'schema', 'dashboard', 'res.list', 'res.get', 'res.options', 'media.list', 'submissions.list', 'submissions.get', 'submissions.export', 'users.list', 'settings.get', 'activity.list', 'search', 'system.info', 'backup.export'], true)) {
+if ($method !== 'POST' && !in_array($route, ['auth.me', 'schema', 'dashboard', 'res.list', 'res.get', 'res.options', 'media.list', 'submissions.list', 'submissions.get', 'submissions.export', 'submissions.file', 'users.list', 'settings.get', 'activity.list', 'search', 'system.info', 'backup.export'], true)) {
     fail('Method not allowed.', 405);
 }
 
@@ -120,31 +121,29 @@ try {
             $top = DB::all('SELECT path, SUM(views) AS v FROM pageviews WHERE day >= ? GROUP BY path ORDER BY v DESC LIMIT 8', [$from]);
             $since7 = date('Y-m-d H:i:s', strtotime('-7 days'));
             $review = [];
-            foreach (['services' => 'title', 'providers' => 'name', 'pages' => 'title'] as $t => $col) {
+            foreach (['services' => 'title', 'pages' => 'title', 'posts' => 'title'] as $t => $col) {
                 foreach (DB::all("SELECT id, $col AS title, status FROM $t WHERE needs_review = 1 ORDER BY sort_order, id LIMIT 50") as $r) {
                     $review[] = ['type' => $t, 'id' => (int)$r['id'], 'title' => $r['title'], 'status' => $r['status']];
                 }
             }
             $health = [];
-            $noPhoto = (int)DB::val("SELECT COUNT(*) FROM providers WHERE status='published' AND (photo = '' OR photo IS NULL)");
-            if ($noPhoto) $health[] = ['level' => 'warn', 'text' => "$noPhoto provider profile(s) have no photo", 'link' => '#/providers'];
             $noImg = (int)DB::val("SELECT COUNT(*) FROM services WHERE status='published' AND (image = '' OR image IS NULL)");
-            if ($noImg) $health[] = ['level' => 'info', 'text' => "$noImg treatment(s) use the placeholder image", 'link' => '#/services'];
-            $emptyT = (int)DB::val("SELECT COUNT(*) FROM testimonials WHERE content IS NULL OR content = ''");
-            if ($emptyT) $health[] = ['level' => 'warn', 'text' => "$emptyT testimonial(s) need their original text", 'link' => '#/testimonials'];
-            $noVideo = array_filter(Content::videos(), fn($v) => $v['source'] === 'missing');
-            if ($noVideo) $health[] = ['level' => 'warn', 'text' => count($noVideo) . ' video(s) not found in the Media Library: ' . implode(', ', array_map(fn($v) => $v['file'], $noVideo)), 'link' => '#/media'];
-            if (!setting('ghl_appointment_embed') && !setting('ghl_webhook_url')) $health[] = ['level' => 'warn', 'text' => 'GoHighLevel is not connected (built-in forms are active)', 'link' => '#/settings/integrations'];
+            if ($noImg) $health[] = ['level' => 'info', 'text' => "$noImg product(s) have no main image", 'link' => '#/services'];
+            $noForm = (int)DB::val("SELECT COUNT(*) FROM services WHERE status='published' AND (quote_form = '' OR quote_form IS NULL)");
+            if ($noForm) $health[] = ['level' => 'info', 'text' => "$noForm product(s) use the general quote form", 'link' => '#/services'];
+            if (!Content::locations()) $health[] = ['level' => 'warn', 'text' => 'The shop address and hours are missing', 'link' => '#/locations'];
+            if (!Forms::recipients((string)setting('notify_email'))) $health[] = ['level' => 'warn', 'text' => 'No email address receives quote requests', 'link' => '#/settings/general'];
+            if (!setting('logo')) $health[] = ['level' => 'info', 'text' => 'No logo is set (the text wordmark is shown)', 'link' => '#/settings/branding'];
             if (setting('seo_noindex') === '1') $health[] = ['level' => 'info', 'text' => 'Search engines are blocked (staging mode)', 'link' => '#/settings/seo'];
             if (!setting('social_facebook') && !setting('social_instagram')) $health[] = ['level' => 'info', 'text' => 'Social media links are not set', 'link' => '#/settings/social'];
 
             $data = [
                 'counts' => [
                     'services' => (int)DB::val("SELECT COUNT(*) FROM services WHERE status='published'"),
-                    'providers' => (int)DB::val("SELECT COUNT(*) FROM providers WHERE status='published'"),
+                    'posts' => (int)DB::val("SELECT COUNT(*) FROM posts WHERE status='published'"),
                     'pages' => (int)DB::val("SELECT COUNT(*) FROM pages WHERE status='published'"),
                     'media' => (int)DB::val('SELECT COUNT(*) FROM media'),
-                    'drafts' => (int)DB::val("SELECT (SELECT COUNT(*) FROM services WHERE status='draft') + (SELECT COUNT(*) FROM pages WHERE status='draft') + (SELECT COUNT(*) FROM providers WHERE status='draft')"),
+                    'drafts' => (int)DB::val("SELECT (SELECT COUNT(*) FROM services WHERE status='draft') + (SELECT COUNT(*) FROM pages WHERE status='draft') + (SELECT COUNT(*) FROM posts WHERE status='draft')"),
                     'review' => count($review),
                 ],
                 'views' => ['days' => array_map(fn($d, $v) => ['day' => $d, 'v' => $v], array_keys($days), array_values($days)), 'total' => array_sum($days), 'prev' => $prev],
@@ -192,6 +191,7 @@ try {
             $total = (int)DB::val("SELECT COUNT(*) FROM $t WHERE " . implode(' AND ', $where), $p);
             $order = !empty($def['orderable']) ? 'sort_order, id' : ($t === 'redirects' ? 'id DESC' : 'id');
             if ($t === 'pages') $order = 'is_system DESC, sort_order, id';
+            if ($t === 'posts') $order = 'published_at DESC, id DESC';
             $rows = DB::all("SELECT * FROM $t WHERE " . implode(' AND ', $where) . " ORDER BY $order LIMIT $per OFFSET " . (($page - 1) * $per), $p);
             $items = [];
             foreach ($rows as $r) {
@@ -201,10 +201,17 @@ try {
                 }
                 if (isset($r['needs_review'])) $item['_review'] = (int)$r['needs_review'] === 1;
                 if (isset($r['is_system'])) $item['_system'] = (int)$r['is_system'] === 1;
-                if (!empty($def['url']) && !empty($r['slug'])) {
+                if ($t === 'posts' && !empty($r['slug'])) {
+                    $item['_url'] = Content::postUrl($r);
+                } elseif (!empty($def['url']) && !empty($r['slug'])) {
                     $item['_url'] = url(str_replace('{slug}', $r['slug'], $def['url']));
                 }
-                if (isset($item['photo'])) $item['photo'] = $item['photo'] ? media_url($item['photo']) : '';
+                foreach ($def['columns'] as $c) {
+                    if ($c['type'] === 'thumb' && !empty($item[$c['key']])) {
+                        $m = DB::one('SELECT thumb, webp, path FROM media WHERE path = ?', [$item[$c['key']]]);
+                        $item[$c['key']] = media_url($m ? ($m['thumb'] ?: ($m['webp'] ?: $m['path'])) : $item[$c['key']]);
+                    }
+                }
                 $items[] = $item;
             }
             ok(['items' => $items, 'total' => $total, 'page' => $page, 'pages' => (int)ceil($total / $per), 'per' => $per]);
@@ -286,7 +293,7 @@ try {
             }
             $stamp = now();
             $row['updated_at'] = $stamp;
-            if (in_array($t, ['services', 'providers', 'pages'], true)) {
+            if (in_array($t, ['services', 'providers', 'pages', 'posts'], true)) {
                 $row['updated_by'] = (int)$u['id'];
             }
             if ($existing) {
@@ -452,7 +459,7 @@ try {
             need('submissions.view');
             $where = ['1=1'];
             $p = [];
-            if (isset(Forms_types()[$in['form'] ?? ''])) {
+            if (isset(Forms_types()[(string)($in['form'] ?? '')])) {
                 $where[] = 'form = ?';
                 $p[] = $in['form'];
             }
@@ -463,8 +470,8 @@ try {
                 $where[] = "status <> 'archived'";
             }
             if (($q = trim((string)($in['q'] ?? ''))) !== '') {
-                $where[] = '(name LIKE ? OR email LIKE ? OR phone LIKE ? OR data LIKE ?)';
-                array_push($p, "%$q%", "%$q%", "%$q%", "%$q%");
+                $where[] = '(name LIKE ? OR email LIKE ? OR phone LIKE ? OR product LIKE ? OR data LIKE ?)';
+                array_push($p, "%$q%", "%$q%", "%$q%", "%$q%", "%$q%");
             }
             $per = 30;
             $page = max(1, (int)($in['page'] ?? 1));
@@ -481,7 +488,23 @@ try {
                 DB::update('submissions', ['status' => 'read'], 'id = ?', [$row['id']]);
                 $row['status'] = 'read';
             }
-            ok(present_submission($row));
+            ok(present_submission($row, true));
+
+        case 'submissions.file':
+            // Artwork uploads are only reachable here, for signed-in users who can see the inbox
+            need('submissions.view');
+            $f = DB::one('SELECT * FROM submission_files WHERE id = ?', [(int)($in['id'] ?? 0)]);
+            $path = $f ? Forms::filePath($f) : null;
+            if (!$path) fail('File not found.', 404);
+            while (ob_get_level()) ob_end_clean();
+            $name = preg_replace('/[^\w.\- ()]+/u', '_', (string)$f['original_name']) ?: 'artwork';
+            header('Content-Type: application/octet-stream');
+            header('Content-Length: ' . filesize($path));
+            header("Content-Disposition: attachment; filename=\"" . str_replace('"', '', $name) . "\"; filename*=UTF-8''" . rawurlencode((string)$f['original_name']));
+            header('X-Content-Type-Options: nosniff');
+            header('Cache-Control: private, no-store');
+            readfile($path);
+            exit;
 
         case 'submissions.update':
             need('submissions.manage');
@@ -495,6 +518,7 @@ try {
             need('submissions.manage');
             $n = 0;
             foreach (array_map('intval', (array)($in['ids'] ?? [])) as $id) {
+                Forms::deleteFiles($id);
                 $n += DB::delete('submissions', 'id = ?', [$id]);
             }
             Auth::log('deleted', 'submissions', null, plural($n, 'submission', 'submissions'));
@@ -510,14 +534,15 @@ try {
             header('Content-Type: text/csv; charset=utf-8');
             header('Content-Disposition: attachment; filename="submissions-' . date('Y-m-d') . '.csv"');
             $out = fopen('php://output', 'w');
-            fputcsv($out, array_merge(['id', 'form', 'status', 'submitted'], array_keys($keys), ['page']));
+            fputcsv($out, array_merge(['id', 'form', 'product', 'status', 'submitted'], array_keys($keys), ['files', 'page']));
             foreach ($rows as $r) {
                 $d = json_list($r['data']);
-                $line = [$r['id'], $r['form'], $r['status'], $r['created_at']];
+                $line = [$r['id'], Forms_types()[$r['form']] ?? $r['form'], $r['product'] ?? '', $r['status'], $r['created_at']];
                 foreach (array_keys($keys) as $k) {
                     $v = (string)($d[$k] ?? '');
                     $line[] = preg_match('/^[=+\-@]/', $v) ? "'" . $v : $v; // CSV injection guard
                 }
+                $line[] = implode(' | ', array_map(fn($f) => $f['original_name'] . ' ' . Forms::fileUrl((int)$f['id']), DB::all('SELECT id, original_name FROM submission_files WHERE submission_id = ?', [$r['id']])));
                 $line[] = $r['page'];
                 fputcsv($out, $line);
             }
@@ -655,7 +680,7 @@ try {
             $q = trim((string)($in['q'] ?? ''));
             $out = [];
             if (mb_strlen($q) >= 2) {
-                foreach (['services', 'providers', 'pages', 'testimonials', 'faqs', 'locations'] as $type) {
+                foreach (['services', 'pages', 'posts', 'testimonials', 'faqs', 'locations'] as $type) {
                     $def = Resources::get($type);
                     $tk = $def['titleKey'];
                     foreach (DB::all("SELECT id, $tk AS title FROM {$def['table']} WHERE $tk LIKE ? ORDER BY $tk LIMIT 5", ["%$q%"]) as $r) {
@@ -692,7 +717,7 @@ try {
         case 'backup.export':
             need('settings.manage');
             $dump = ['exported_at' => date('c'), 'version' => VERSION];
-            foreach (['settings', 'services', 'providers', 'pages', 'locations', 'testimonials', 'faqs', 'redirects', 'media'] as $t) {
+            foreach (['settings', 'services', 'pages', 'posts', 'locations', 'testimonials', 'faqs', 'redirects', 'media'] as $t) {
                 $dump[$t] = DB::all("SELECT * FROM $t");
             }
             header('Content-Type: application/json; charset=utf-8');
@@ -712,24 +737,44 @@ try {
 
 function Forms_types(): array
 {
-    return ['appointment' => 'Appointment Request', 'contact' => 'Contact Message', 'benefits' => 'Benefits Check'];
+    return QuoteForms::options();
 }
 
-function present_submission(array $r): array
+function present_submission(array $r, bool $full = false): array
 {
-    return [
+    $def = QuoteForms::get((string)$r['form']);
+    $data = json_list($r['data']);
+    $labels = [];
+    foreach ($def['fields'] ?? [] as $f) {
+        $labels[$f['name']] = $f['label'];
+    }
+    $out = [
         'id' => (int)$r['id'],
         'form' => $r['form'],
-        'form_label' => Forms_types()[$r['form']] ?? $r['form'],
+        'form_label' => $def['title'] ?? $r['form'],
+        'kind' => $def['kind'] ?? 'contact',
+        'product' => (string)($r['product'] ?? ''),
         'name' => $r['name'],
         'email' => $r['email'],
         'phone' => $r['phone'],
-        'data' => json_list($r['data']),
+        'data' => $data,
+        'labels' => $labels,
         'page' => $r['page'],
         'status' => $r['status'],
         'forwarded' => (int)$r['forwarded'] === 1,
         'created_at' => $r['created_at'],
     ];
+    if ($full) {
+        $out['files'] = array_map(fn($f) => [
+            'id' => (int)$f['id'],
+            'name' => $f['original_name'],
+            'size' => (int)$f['size'],
+            'url' => url('admin/api.php?r=submissions.file&id=' . (int)$f['id']),
+        ], DB::all('SELECT * FROM submission_files WHERE submission_id = ? ORDER BY id', [(int)$r['id']]));
+    } else {
+        $out['file_count'] = (int)DB::val('SELECT COUNT(*) FROM submission_files WHERE submission_id = ?', [(int)$r['id']]);
+    }
+    return $out;
 }
 
 function self_ini_bytes(string $key): int

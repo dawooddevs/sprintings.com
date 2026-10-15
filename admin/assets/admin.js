@@ -77,6 +77,10 @@
     eraser: '<path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/>',
     code: '<path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/>',
     archive: '<rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/>',
+    printer: '<path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/>',
+    layers: '<path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>',
+    paperclip: '<path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/>',
+    heart: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
     search2: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>'
   };
   function ic(name, cls) {
@@ -204,8 +208,8 @@
     app.innerHTML =
       '<div class="login">' +
       '<div class="login__art"><div class="login__brand"><span>' + ic('plus') + '</span>' + esc(A.siteName) + '</div>' +
-      '<div class="login__quote"><h2>Everything for your website, in one place.</h2><p>Edit treatments, providers and pages, manage the media library, answer appointment requests and control who has access.</p></div>' +
-      '<div class="login__feat"><span>Treatments</span><span>Providers</span><span>Media library</span><span>Form inbox</span><span>Users &amp; roles</span><span>SEO &amp; redirects</span></div></div>' +
+      '<div class="login__quote"><h2>Everything for your website, in one place.</h2><p>Edit products, pages and blog posts, manage the media library, answer quote requests and control who has access.</p></div>' +
+      '<div class="login__feat"><span>Products</span><span>Blog</span><span>Media library</span><span>Quote inbox</span><span>Users &amp; roles</span><span>SEO &amp; redirects</span></div></div>' +
       '<div class="login__panel"><form class="login__form" novalidate>' +
       '<h1>Welcome back</h1><p>Sign in to the ' + esc(A.siteName) + ' dashboard.</p>' +
       (msg ? '<div class="login__err">' + esc(msg) + '</div>' : '<div class="login__err" hidden></div>') +
@@ -241,11 +245,12 @@
       { hash: '#/dashboard', label: 'Dashboard', icon: 'dashboard' },
       { group: 'Content' }
     ];
-    ['services', 'providers', 'pages', 'testimonials', 'faqs', 'locations'].forEach(function (k) {
+    // Providers and Locations are not used by Sprintings; the shop location is edited from Settings
+    ['services', 'pages', 'posts', 'testimonials', 'faqs'].forEach(function (k) {
       if (R[k] && can('content.view')) items.push({ hash: '#/' + k, label: R[k].label, icon: R[k].icon });
     });
     if (can('media.view')) items.push({ hash: '#/media', label: 'Media Library', icon: 'image' });
-    if (can('submissions.view')) { items.push({ group: 'Patients' }); items.push({ hash: '#/submissions', label: 'Form Inbox', icon: 'inbox', badge: true }); }
+    if (can('submissions.view')) { items.push({ group: 'Customers' }); items.push({ hash: '#/submissions', label: 'Form Inbox', icon: 'inbox', badge: true }); }
     var adm = [];
     if (can('users.manage')) adm.push({ hash: '#/users', label: 'Users & Roles', icon: 'users' });
     if (can('settings.manage')) adm.push({ hash: '#/settings', label: 'Settings', icon: 'settings' });
@@ -326,7 +331,7 @@
   /* =====================================================================
      Router
      ===================================================================== */
-  var RES = 'services|providers|pages|testimonials|faqs|locations|redirects';
+  var RES = 'services|providers|pages|posts|testimonials|faqs|locations|redirects';
   var routes = [
     [/^#\/dashboard$/, viewDashboard],
     [new RegExp('^#\\/(' + RES + ')$'), viewList],
@@ -383,7 +388,7 @@
     var hr = new Date().getHours();
     var greet = hr < 12 ? 'Good morning' : hr < 18 ? 'Good afternoon' : 'Good evening';
     view.innerHTML = '<div class="welcome"><div><h1>' + greet + ', ' + esc((S.user.name || S.user.username).split(' ')[0]) + '</h1><p>Here’s what’s happening on ' + esc(A.siteName) + '.</p></div>' +
-      '<div class="ph__actions">' + (can('content.edit') ? '<a class="btn btn--ghost" href="#/services/new">' + ic('plus') + 'New treatment</a>' : '') + (can('media.upload') ? '<a class="btn btn--ghost" href="#/media">' + ic('upload') + 'Upload media</a>' : '') + '<a class="btn btn--accent" href="' + esc(A.base) + '" target="_blank" rel="noopener">' + ic('external') + 'View site</a></div></div>' +
+      '<div class="ph__actions">' + (can('content.edit') ? '<a class="btn btn--ghost" href="#/services/new">' + ic('plus') + 'New product</a>' : '') + (can('media.upload') ? '<a class="btn btn--ghost" href="#/media">' + ic('upload') + 'Upload media</a>' : '') + '<a class="btn btn--accent" href="' + esc(A.base) + '" target="_blank" rel="noopener">' + ic('external') + 'View site</a></div></div>' +
       '<div class="grid grid--kpi" id="kpis">' + [1, 2, 3, 4].map(function () { return '<div class="card kpi"><div class="skel" style="width:40%"></div><div class="skel" style="width:60%;height:26px;margin-top:10px"></div></div>'; }).join('') + '</div>';
     get('dashboard').then(function (d) {
       var c = d.counts, v = d.views;
@@ -391,7 +396,7 @@
       $('#kpis', view).innerHTML =
         kpi('#/dashboard', 'trending', '', 'Page views · 30 days', v.total.toLocaleString(), delta === null ? 'Tracking since install' : (delta >= 0 ? '▲ ' : '▼ ') + Math.abs(delta) + '% vs previous 30 days', delta === null ? '' : delta >= 0 ? 'up' : 'down') +
         (c.new_submissions !== undefined ? kpi('#/submissions', 'inbox', 'red', 'New form submissions', c.new_submissions, c.week_submissions + ' in the last 7 days') : kpi('#/pages', 'file-text', 'red', 'Published pages', c.pages, '')) +
-        kpi('#/services', 'activity', 'green', 'Published treatments', c.services, c.providers + ' provider profiles · ' + c.pages + ' pages') +
+        kpi('#/services', 'printer', 'green', 'Published products', c.services, c.posts + ' blog posts · ' + c.pages + ' pages') +
         kpi('#/services', 'flag', 'amber', 'Needs content review', c.review, c.drafts + ' drafts · ' + c.media + ' media files');
       var g = el('<div class="grid grid--2" style="margin-top:18px"></div>');
       g.appendChild(el('<div class="card"><div class="card__h"><h2>Page views — last 30 days</h2><span class="muted" style="font-size:.82rem">Visitors excluding bots</span></div><div class="card__b"><div class="chart" id="chart"></div></div></div>'));
@@ -411,7 +416,7 @@
       var g3 = el('<div class="grid grid--2e" style="margin-top:18px"></div>');
       if (d.submissions) {
         g3.appendChild(el('<div class="card"><div class="card__h"><h2>Latest form submissions</h2><a class="btn btn--sm btn--ghost" href="#/submissions">Open inbox</a></div><div class="card__b--flush">' +
-          (d.submissions.length ? '<ul class="list">' + d.submissions.map(function (s) { return '<li><a class="list__row" href="#/submissions/' + s.id + '"><span class="list__ico">' + ic(s.form === 'appointment' ? 'clock' : s.form === 'benefits' ? 'shield-check' : 'mail') + '</span><span class="list__main"><strong>' + esc(s.name || s.email || 'Anonymous') + '</strong><small>' + esc(s.form_label) + ' · ' + ago(s.created_at) + '</small></span>' + (s.status === 'new' ? '<span class="pill pill--new">New</span>' : '') + '</a></li>'; }).join('') + '</ul>' : '<div class="empty-s">' + ic('inbox') + 'No submissions yet.</div>') + '</div></div>'));
+          (d.submissions.length ? '<ul class="list">' + d.submissions.map(function (s) { return '<li><a class="list__row" href="#/submissions/' + s.id + '"><span class="list__ico">' + ic(s.kind === 'quote' ? 'printer' : s.kind === 'newsletter' ? 'sparkles' : 'mail') + '</span><span class="list__main"><strong>' + esc(s.name || s.email || 'Anonymous') + '</strong><small>' + esc(s.form_label) + ' · ' + ago(s.created_at) + '</small></span>' + (s.status === 'new' ? '<span class="pill pill--new">New</span>' : '') + '</a></li>'; }).join('') + '</ul>' : '<div class="empty-s">' + ic('inbox') + 'No submissions yet.</div>') + '</div></div>'));
       }
       g3.appendChild(el('<div class="card"><div class="card__h"><h2>Recent activity</h2>' + (can('activity.view') ? '<a class="btn btn--sm btn--ghost" href="#/activity">View all</a>' : '') + '</div><div class="card__b--flush">' + activityList(d.activity) + '</div></div>'));
       view.appendChild(g3);
@@ -491,7 +496,7 @@
       case 'option': return '<span class="tag">' + esc(optionLabel(def, col.key, v)) + '</span>';
       case 'bool': return +v ? '<span style="color:var(--green)">' + ic('check-circle') + '</span>' : '<span class="muted">—</span>';
       case 'date': return '<span class="muted nowrap" title="' + esc(fullDate(v)) + '">' + ago(v) + '</span>';
-      case 'thumb': return v ? '<img class="tbl-thumb" src="' + esc(v) + '" alt="">' : '<span class="tbl-thumb" style="display:grid;place-items:center;color:var(--faint)">' + ic('user') + '</span>';
+      case 'thumb': return v ? '<img class="tbl-thumb" src="' + esc(v) + '" alt="" loading="lazy">' : '<span class="tbl-thumb" style="display:grid;place-items:center;color:var(--faint)">' + ic(def._type === 'providers' ? 'user' : 'image') + '</span>';
       case 'excerpt': return v ? '<span class="tbl-excerpt">' + esc(v) + '</span>' : '<span class="pill pill--amber">Needs original text</span>';
       case 'path': return '<span class="mono muted">' + esc(def._type === 'pages' ? '/' + v + '/' : v) + '</span>';
       case 'number': return '<strong style="color:var(--ink)">' + (+v || 0).toLocaleString() + '</strong>';
@@ -509,7 +514,7 @@
     var canEdit = can('content.edit') && (!def.cap || can(def.cap));
     var canDel = can('content.delete') && (!def.cap || can(def.cap));
     var canPub = can('content.publish');
-    var subs = { services: 'Service and treatment pages. Drag to reorder how they appear in menus and listings.', providers: 'Provider profiles shown on the website.', pages: 'Core and standard pages. Core pages keep their URLs and cannot be deleted.', testimonials: 'Patient stories. Only published testimonials with text appear on the site.', faqs: 'Questions shown on the website, grouped by where they appear (with FAQ schema).', locations: 'Office details used in the header, footer, maps and local SEO schema.', redirects: '301 redirects keep old URLs and SEO value working.' };
+    var subs = { services: 'Product pages at /service/…/. Drag to reorder how they appear in menus and listings.', providers: 'Team profiles (not used on this site).', pages: 'Core and standard pages. Core pages keep their URLs and cannot be deleted.', posts: 'Blog posts at /year/month/day/slug/, newest first.', testimonials: 'Google reviews shown on the website. Only published reviews with text appear.', faqs: 'Questions shown on the website, grouped by where they appear (with FAQ schema).', locations: 'The shop address, opening hours and map used in the footer, contact page and local search schema.', redirects: '301 redirects keep old URLs and SEO value working.' };
     view.innerHTML = header(esc(def.label), esc(subs[type] || ''), canEdit ? '<a class="btn btn--primary" href="#/' + type + '/new">' + ic('plus') + 'New ' + esc(def.singular.toLowerCase()) + '</a>' : '') +
       '<div class="card"><div class="toolbar">' +
       '<label class="search-in">' + ic('search') + '<input type="search" placeholder="Search ' + esc(def.label.toLowerCase()) + '…" data-q></label>' +
@@ -773,6 +778,15 @@
         wrap.appendChild(relation(f, Array.isArray(v) ? v : [], set));
         if (help) wrap.appendChild(el(help));
         break;
+      case 'datetime':
+        wrap.innerHTML = label + '<input class="in" type="datetime-local" id="' + id + '" value="' + esc(v) + '">' + help;
+        $('input', wrap).addEventListener('input', function (e) { set(e.target.value); });
+        break;
+      case 'gallery':
+        wrap.innerHTML = '<span class="f__label">' + esc(f.label) + '</span>';
+        wrap.appendChild(galleryField(Array.isArray(v) ? v.slice() : [], set));
+        if (help) wrap.appendChild(el(help));
+        break;
       case 'image': case 'file':
         wrap.innerHTML = '<span class="f__label">' + esc(f.label) + '</span>';
         wrap.appendChild(f.type === 'image' ? imageField(f, vals, set, onChange) : fileField(f, v, set));
@@ -986,6 +1000,30 @@
     render();
     return w;
   }
+  /* Gallery: several images from the media library, drag to reorder */
+  function galleryField(list, set) {
+    var w = el('<div class="galf"><div class="galf__grid"></div><div class="imgf__actions"><button type="button" class="btn btn--ghost btn--sm" data-add>' + ic('plus') + 'Add images</button></div></div>');
+    var grid = $('.galf__grid', w), drag = null;
+    function render() {
+      grid.innerHTML = list.length ? list.map(function (p, i) { return '<div class="galf__item" draggable="true" data-i="' + i + '"><img src="' + esc(mediaUrl(p)) + '" alt=""><button type="button" class="galf__rm" data-rm="' + i + '" title="Remove" aria-label="Remove image">' + ic('x') + '</button></div>'; }).join('') : '<div class="imgf__empty">' + ic('image') + '<span>No images yet</span></div>';
+    }
+    function changed() { set(list.slice()); render(); }
+    grid.addEventListener('click', function (e) { var b = e.target.closest('[data-rm]'); if (b) { list.splice(+b.getAttribute('data-rm'), 1); changed(); } });
+    grid.addEventListener('dragstart', function (e) { var it = e.target.closest('[data-i]'); if (it) { drag = +it.getAttribute('data-i'); e.dataTransfer.effectAllowed = 'move'; } });
+    grid.addEventListener('dragover', function (e) { if (drag !== null) e.preventDefault(); });
+    grid.addEventListener('drop', function (e) { e.preventDefault(); var it = e.target.closest('[data-i]'); if (it && drag !== null) { var to = +it.getAttribute('data-i'); var x = list.splice(drag, 1)[0]; list.splice(to, 0, x); drag = null; changed(); } });
+    $('[data-add]', w).addEventListener('click', function () {
+      (function more() {
+        mediaPicker({ kind: 'image' }).then(function (m) {
+          if (!m) return;
+          if (list.indexOf(m.path) < 0) { list.push(m.path); changed(); }
+          confirmBox('Image added', 'Add another image to the gallery?', 'Add another').then(function (y) { if (y) more(); });
+        });
+      })();
+    });
+    render();
+    return w;
+  }
   function fileField(f, v, set) {
     var w = el('<div class="filef">' + ic('file') + '<span class="filef__name"></span><button type="button" class="btn btn--ghost btn--sm" data-pick>Choose file</button><button type="button" class="btn btn--plain btn--sm btn--icon" data-rm title="Remove">' + ic('x') + '</button></div>');
     function render() {
@@ -1147,11 +1185,11 @@
 
   /* Match uploaded images to treatments/pages/settings by file name */
   function autoAssign() {
-    var body = el('<div><div class="notice notice--blue">' + ic('info') + '<span>Images are matched by file name: <b>regenerative-medicine.jpg</b> → Regenerative Medicine, <b>page-contact-us.jpg</b> → Contact page, <b>location-main.jpg</b>, <b>provider-dr-jane-smith.jpg</b>, <b>home-hero.jpg</b>, <b>home-integrated-care.jpg</b>, <b>social-share.jpg</b>, <b>logo.png</b>. Treatment titles also work as file names.</span></div>' +
+    var body = el('<div><div class="notice notice--blue">' + ic('info') + '<span>Images are matched by file name: <b>business-cards.jpg</b> → Business Cards, <b>page-about-us.jpg</b> → About page, <b>location-long-beach.jpg</b>, <b>home-hero.jpg</b>, <b>home-about.jpg</b>, <b>social-share.jpg</b>, <b>logo.png</b>. Product names also work as file names.</span></div>' +
       '<label class="toggle" style="margin-bottom:14px"><span>Replace images that are already set</span><input type="checkbox" data-ow><span class="toggle__ui"></span></label><div data-res><div class="skel"></div></div></div>');
     var res = $('[data-res]', body), ow = $('[data-ow]', body);
     function render(d) {
-      if (!d.matches.length) { res.innerHTML = '<div class="empty-s">' + ic('image') + 'No matching file names found among ' + d.files + ' images. Upload images named after the treatment first.</div>'; return; }
+      if (!d.matches.length) { res.innerHTML = '<div class="empty-s">' + ic('image') + 'No matching file names found among ' + d.files + ' images. Upload images named after the product first.</div>'; return; }
       var todo = d.matches.filter(function (m) { return m.status === 'will assign' || m.status === 'assigned'; }).length;
       res.innerHTML = '<p class="muted" style="margin:0 0 10px">' + d.matches.length + ' matches · <strong style="color:var(--ink)">' + todo + '</strong> to assign</p><div class="card"><ul class="list">' + d.matches.map(function (m) {
         var tone = m.status === 'assigned' || m.status === 'will assign' ? 'green' : m.status === 'already set' ? 'blue' : 'amber';
@@ -1183,17 +1221,19 @@
     if (!can('submissions.view')) return denied(view);
     document.title = 'Form Inbox · ' + A.siteName;
     var st = { status: '', form: '', q: '', page: 1, active: openId ? +openId : null };
-    view.innerHTML = header('Form Inbox', 'Appointment requests, contact messages and benefits checks submitted through the website.', '<a class="btn btn--ghost" href="' + A.api + '?r=submissions.export">' + ic('download') + 'Export CSV</a>') +
+    view.innerHTML = header('Form Inbox', 'Quote requests, contact messages and newsletter sign-ups from the website. Artwork files download only here.', '<a class="btn btn--ghost" href="' + A.api + '?r=submissions.export">' + ic('download') + 'Export CSV</a>') +
       '<div class="sub-layout"><div class="card"><div class="toolbar">' +
       '<label class="search-in">' + ic('search') + '<input type="search" placeholder="Search name, phone, email…" data-sq></label>' +
       '<select class="sel" data-sstatus><option value="">Inbox</option><option value="new">New</option><option value="read">Read</option><option value="archived">Archived</option></select>' +
-      '<select class="sel" data-sform><option value="">All forms</option><option value="appointment">Appointments</option><option value="contact">Contact</option><option value="benefits">Benefits checks</option></select>' +
+      '<select class="sel" data-sform><option value="">All forms</option></select>' +
       '</div><div data-slist><div class="card__b"><div class="skel"></div></div></div><div class="pager" data-spager></div></div><div class="sub-detail" data-sdetail></div></div>';
     var list = $('[data-slist]', view), detail = $('[data-sdetail]', view);
     function load() {
       get('submissions.list', { status: st.status, form: st.form, q: st.q, page: st.page }).then(function (d) {
+        var sf = $('[data-sform]', view);
+        if (sf && sf.options.length < 2 && d.types) Object.keys(d.types).forEach(function (k) { sf.appendChild(el('<option value="' + esc(k) + '">' + esc(d.types[k]) + '</option>')); });
         list.innerHTML = d.items.length ? '<ul class="list sub-list">' + d.items.map(function (s) {
-          return '<li data-sid="' + s.id + '" class="' + (s.status === 'new' ? 'is-new ' : '') + (s.id === st.active ? 'is-active' : '') + '"><span class="list__ico">' + ic(s.form === 'appointment' ? 'clock' : s.form === 'benefits' ? 'shield-check' : 'mail') + '</span><div class="list__main"><strong>' + esc(s.name || s.email || 'Anonymous') + '</strong><small>' + esc(s.form_label) + ' · ' + esc(s.phone || s.email) + '</small></div><span class="muted nowrap" style="font-size:.78rem">' + ago(s.created_at) + '</span></li>';
+          return '<li data-sid="' + s.id + '" class="' + (s.status === 'new' ? 'is-new ' : '') + (s.id === st.active ? 'is-active' : '') + '"><span class="list__ico">' + ic(s.kind === 'quote' ? 'printer' : s.kind === 'newsletter' ? 'sparkles' : 'mail') + '</span><div class="list__main"><strong>' + esc(s.name || s.email || 'Anonymous') + '</strong><small>' + esc(s.product || s.form_label) + ' · ' + esc(s.phone || s.email) + (s.file_count ? ' · ' + s.file_count + ' file' + (s.file_count > 1 ? 's' : '') : '') + '</small></div><span class="muted nowrap" style="font-size:.78rem">' + (s.file_count ? ic('paperclip') : '') + ago(s.created_at) + '</span></li>';
         }).join('') + '</ul>' : '<div class="empty-s">' + ic('inbox') + 'No submissions here.</div>';
         $('[data-spager]', view).innerHTML = '<span>' + d.total + ' total · ' + d.counts.new + ' new</span>' + (d.pages > 1 ? '<span class="ph__actions"><button class="btn btn--sm btn--ghost" data-sp="' + (d.page - 1) + '"' + (d.page <= 1 ? ' disabled' : '') + '>' + ic('arrow-left') + '</button><button class="btn btn--sm btn--ghost" data-sp="' + (d.page + 1) + '"' + (d.page >= d.pages ? ' disabled' : '') + '>' + ic('arrow-right') + '</button></span>' : '');
         var b = $('[data-new-badge]'); if (b) { b.textContent = d.counts.new; b.hidden = !d.counts.new; }
@@ -1206,10 +1246,11 @@
       history.replaceState(null, '', '#/submissions/' + id); S.lastHash = location.hash;
       get('submissions.get', { id: id }).then(function (s) {
         var li = $('[data-sid="' + id + '"]', list); if (li) li.classList.remove('is-new');
-        var rows = Object.keys(s.data).map(function (k) { return '<div><span>' + esc(k.replace(/_/g, ' ').replace(/^\w/, function (c) { return c.toUpperCase(); })) + '</span><strong>' + esc(s.data[k] || '—') + '</strong></div>'; }).join('');
+        var rows = (s.product ? '<div><span>Product</span><strong>' + esc(s.product) + '</strong></div>' : '') + Object.keys(s.data).map(function (k) { return '<div><span>' + esc((s.labels && s.labels[k]) || k.replace(/_/g, ' ').replace(/^\w/, function (c) { return c.toUpperCase(); })) + '</span><strong style="white-space:pre-wrap">' + esc(s.data[k] || '—') + '</strong></div>'; }).join('') +
+          (s.files && s.files.length ? '<div><span>Artwork files</span><strong>' + s.files.map(function (f) { return '<a class="btn btn--ghost btn--sm" style="margin:0 6px 6px 0" href="' + esc(f.url) + '">' + ic('download') + esc(f.name) + ' <span class="muted">· ' + bytes(f.size) + '</span></a>'; }).join('') + '</strong></div>' : '');
         detail.innerHTML = '<div class="card"><div class="card__h"><div><h2>' + esc(s.name || 'Anonymous') + '</h2><span class="muted" style="font-size:.82rem">' + esc(s.form_label) + ' · ' + fullDate(s.created_at) + '</span></div><span class="pill pill--' + esc(s.status) + '">' + esc(s.status) + '</span></div>' +
           '<div class="card__b"><div class="ph__actions" style="margin-bottom:14px">' + (s.phone ? '<a class="btn btn--primary btn--sm" href="tel:' + esc(s.phone) + '">' + ic('phone') + 'Call</a><a class="btn btn--ghost btn--sm" href="sms:' + esc(s.phone) + '">' + ic('message-square') + 'Text</a>' : '') + (s.email ? '<a class="btn btn--ghost btn--sm" href="mailto:' + esc(s.email) + '">' + ic('mail') + 'Email</a>' : '') + '</div>' +
-          '<div class="sub-fields">' + rows + '<div><span>Submitted from</span><strong class="mono">' + esc(s.page || '—') + '</strong></div><div><span>Sent to GoHighLevel</span><strong>' + (s.forwarded ? 'Yes' : 'No') + '</strong></div></div>' +
+          '<div class="sub-fields">' + rows + '<div><span>Submitted from</span><strong class="mono">' + esc(s.page || '—') + '</strong></div><div><span>Sent to webhook</span><strong>' + (s.forwarded ? 'Yes' : 'No') + '</strong></div></div>' +
           (can('submissions.manage') ? '<div class="ph__actions" style="margin-top:16px"><button class="btn btn--ghost btn--sm" data-mark="new">Mark unread</button><button class="btn btn--ghost btn--sm" data-mark="' + (s.status === 'archived' ? 'read' : 'archived') + '">' + ic('archive') + (s.status === 'archived' ? 'Restore' : 'Archive') + '</button><button class="btn btn--danger btn--sm" data-sdel>' + ic('trash') + 'Delete</button></div>' : '') + '</div></div>';
         $$('[data-mark]', detail).forEach(function (b) { b.addEventListener('click', function () { api('submissions.update', { ids: [id], status: b.getAttribute('data-mark') }).then(function () { toast('Updated.'); load(); show(b.getAttribute('data-mark') === 'archived' && st.status !== 'archived' ? null : id); }); }); });
         var d = $('[data-sdel]', detail);
@@ -1299,8 +1340,8 @@
     tab = tab || 'general';
     if (!tabs[tab] && tab !== 'system') tab = 'general';
     document.title = 'Settings · ' + A.siteName;
-    view.innerHTML = header('Settings', 'Brand, homepage, integrations, patient forms and SEO.') +
-      '<div class="set-layout"><nav class="card set-nav">' + Object.keys(tabs).map(function (k) { return '<a href="#/settings/' + k + '" class="' + (k === tab ? 'is-active' : '') + '">' + ic(tabs[k].icon) + esc(tabs[k].label) + '</a>'; }).join('') + '<a href="#/settings/system" class="' + (tab === 'system' ? 'is-active' : '') + '">' + ic('database') + 'System &amp; Backup</a></nav><div data-panel></div></div>';
+    view.innerHTML = header('Settings', 'Business details, brand, homepage text, menus, integrations and SEO.') +
+      '<div class="set-layout"><nav class="card set-nav">' + Object.keys(tabs).map(function (k) { return '<a href="#/settings/' + k + '" class="' + (k === tab ? 'is-active' : '') + '">' + ic(tabs[k].icon) + esc(tabs[k].label) + '</a>'; }).join('') + '<a href="#/locations">' + ic('map-pin') + 'Shop location &amp; hours</a><a href="#/settings/system" class="' + (tab === 'system' ? 'is-active' : '') + '">' + ic('database') + 'System &amp; Backup</a></nav><div data-panel></div></div>';
     var panel = $('[data-panel]', view);
     if (tab === 'system') return systemPanel(panel);
     get('settings.get').then(function (all) {
@@ -1383,7 +1424,7 @@
     document.body.appendChild(p);
     var input = $('input', p), list = $('.palette__list', p), hl = 0, results = [];
     var nav = navItems().filter(function (n) { return !n.group; }).map(function (n) { return { title: n.label, hash: n.hash, icon: n.icon, label: 'Go to' }; });
-    if (can('content.edit')) ['services', 'providers', 'pages', 'testimonials', 'faqs'].forEach(function (k) { var r = S.schema.resources[k]; nav.push({ title: 'New ' + r.singular.toLowerCase(), hash: '#/' + k + '/new', icon: 'plus', label: 'Create' }); });
+    if (can('content.edit')) ['services', 'pages', 'posts', 'testimonials', 'faqs'].forEach(function (k) { var r = S.schema.resources[k]; nav.push({ title: 'New ' + r.singular.toLowerCase(), hash: '#/' + k + '/new', icon: 'plus', label: 'Create' }); });
     nav.push({ title: 'My profile', hash: '#/profile', icon: 'user', label: 'Go to' });
     function render(items) {
       results = items; hl = 0;

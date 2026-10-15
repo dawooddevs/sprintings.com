@@ -1,6 +1,7 @@
 <?php
 require_once APP . '/schema.php';
 require_once APP . '/seed/seed.php';
+require_once APP . '/lib/Forms.php';
 
 /**
  * Shared installer used by /install/ (web) and app/cli/install.php (CLI).
@@ -54,7 +55,13 @@ final class Installer
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
-            Settings::set('notify_email', strtolower(trim($admin['email'])));
+            // Keep the notification recipients the seed set (Sprintings' sales inbox); fall back to the admin
+            if (trim((string)Settings::get('notify_email', '')) === '') {
+                Settings::set('notify_email', strtolower(trim($admin['email'])));
+            }
+            // The seed already contains everything the current migrations add
+            $ids = array_map(fn($f) => basename($f, '.php'), glob(APP . '/migrations/*.php') ?: []);
+            Settings::set('migrations_applied', json_encode(array_values($ids)));
             Settings::set('seo_noindex', !empty($opts['noindex']) ? '1' : '0');
             Settings::set('installed_at', now());
         });

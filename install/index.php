@@ -134,7 +134,7 @@ if (!$installed && ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
       <div class="fields">
         <div class="f f--half"><label>Full name</label><input class="in" name="admin_name" value="<?= e($v['admin_name']) ?>"></div>
         <div class="f f--half"><label>Username</label><input class="in" name="admin_username" value="<?= e($v['admin_username']) ?>" required></div>
-        <div class="f"><label>Email (also receives form notifications)</label><input class="in" type="email" name="admin_email" value="<?= e($v['admin_email']) ?>" required></div>
+        <div class="f"><label>Email (for signing in; quote notifications go to sales@sprintings.com — change in Settings)</label><input class="in" type="email" name="admin_email" value="<?= e($v['admin_email']) ?>" required></div>
         <div class="f f--half"><label>Password</label><input class="in" type="password" name="admin_password" autocomplete="new-password" required minlength="8"></div>
         <div class="f f--half"><label>Confirm password</label><input class="in" type="password" name="admin_password2" autocomplete="new-password" required minlength="8"></div>
         <div class="f"><label class="toggle"><span>Hide the site from search engines (recommended while on the staging domain)</span><input type="checkbox" name="noindex" value="1"<?= $v['noindex'] ? ' checked' : '' ?>><span class="toggle__ui"></span></label></div>

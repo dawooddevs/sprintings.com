@@ -55,7 +55,7 @@ AddType image/avif .avif
 # Allow media uploads up to 100 MB. SiteGround (PHP-FPM) reads .user.ini; this block covers mod_php hosts.
 <IfModule mod_php.c>
   php_value upload_max_filesize 100M
-  php_value post_max_size 105M
+  php_value post_max_size 260M
   php_value max_execution_time 300
   php_value max_input_time 300
 </IfModule>
