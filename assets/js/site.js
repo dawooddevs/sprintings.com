@@ -106,6 +106,7 @@
       if (open) { lastFocus = document.activeElement; setTimeout(function () { var c = $('.drawer__close', drawer); if (c) c.focus(); }, 50); }
       else if (lastFocus) lastFocus.focus();
     };
+    drawer.setAttribute('aria-hidden', 'true');
     if ('inert' in drawer) { drawer.inert = true; }
     openBtn.addEventListener('click', function () { if ('inert' in drawer) drawer.inert = false; setDrawer(true); });
     $$('[data-drawer-close]', drawer).forEach(function (b) { b.addEventListener('click', function () { setDrawer(false); if ('inert' in drawer) drawer.inert = true; }); });
@@ -121,7 +122,20 @@
     var pBtn = $('[data-drawer-products]', drawer);
     if (pBtn) {
       var panel = document.getElementById(pBtn.getAttribute('aria-controls'));
-      bindSearch(panel);
+      // The product list is copied from the mega-menu on first open, to keep the page light
+      var slot = $('[data-mega-clone]', panel), src = $('[data-mega-results]', mega || document);
+      var filled = false;
+      var fill = function () {
+        if (filled || !slot || !src) return;
+        filled = true;
+        slot.appendChild(src.cloneNode(true));
+        var empty = $('[data-mega-empty]', mega || document);
+        if (empty) { var e2 = empty.cloneNode(true); e2.hidden = true; slot.appendChild(e2); }
+        $$('mark', slot).forEach(function (m) { m.replaceWith(document.createTextNode(m.textContent)); });
+        $$('[hidden]', slot).forEach(function (x) { if (!x.hasAttribute('data-mega-empty')) x.hidden = false; });
+        bindSearch(panel);
+      };
+      pBtn.addEventListener('click', fill);
       pBtn.addEventListener('click', function () {
         var open = pBtn.getAttribute('aria-expanded') !== 'true';
         pBtn.setAttribute('aria-expanded', open ? 'true' : 'false');

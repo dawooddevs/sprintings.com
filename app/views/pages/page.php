@@ -1,12 +1,13 @@
 <?php
-/** SCAFFOLD standard content page (template "default"). @var array $page */
+/** Standard content page (template "default"). @var array $page */
 Seo::set(['title' => $page['meta_title'] ?: $page['title'], 'description' => $page['meta_description'] ?: $page['intro'], 'canonical' => abs_url($page['slug'] . '/'), 'image' => $page['image']]);
-if (in_array($page['slug'], ['thank-you'], true)) Seo::$noindex = true;
-partial('page-head', ['title' => $page['title'], 'intro' => $page['intro'], 'crumbs' => [[$page['title'], $page['slug'] . '/']]]);
+if ($page['slug'] === 'thank-you') Seo::$noindex = true;
+partial('page-head', ['title' => $page['title'], 'intro' => $page['intro'], 'eyebrow' => $page['eyebrow'], 'crumbs' => [[$page['title'], $page['slug'] . '/']], 'dark' => true]);
 ?>
 <section class="section">
-  <div class="container narrow prose">
-    <?php if ($page['image']): ?><?= img($page['image'], $page['title']) ?><?php endif; ?>
-    <?= Html::clean((string)$page['content']) ?>
+  <div class="container container--narrow">
+    <?php if ($page['image']): ?><figure style="margin:0 0 40px"><?= img($page['image'], $page['title'], ['sizes' => '820px']) ?></figure><?php endif; ?>
+    <div class="prose"><?= Html::clean((string)$page['content']) ?></div>
   </div>
 </section>
+<?php if ((int)$page['show_cta']): ?><section class="section section--paper2"><div class="container"><?php partial('cta-band'); ?></div></section><?php endif; ?>

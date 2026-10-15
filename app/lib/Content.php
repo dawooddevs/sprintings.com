@@ -252,7 +252,7 @@ final class Content
     /**
      * Site videos. Each is found in the Media Library by 'file' name (or one of its 'alt' names,
      * see Media::matchKey), unless a different file is chosen in Settings → Videos. Add entries
-     * here (and a matching setting in Settings/Resources) when the practice supplies videos.
+     * here (and a matching setting in Settings/Resources) when Sprintings supplies videos.
      */
     public const VIDEOS = [];
 

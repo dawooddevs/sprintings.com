@@ -122,7 +122,7 @@ try {
             $since7 = date('Y-m-d H:i:s', strtotime('-7 days'));
             $review = [];
             foreach (['services' => 'title', 'pages' => 'title', 'posts' => 'title'] as $t => $col) {
-                foreach (DB::all("SELECT id, $col AS title, status FROM $t WHERE needs_review = 1 ORDER BY sort_order, id LIMIT 50") as $r) {
+                foreach (DB::all("SELECT id, $col AS title, status FROM $t WHERE needs_review = 1 ORDER BY " . ($t === 'posts' ? 'published_at DESC, id' : 'sort_order, id') . ' LIMIT 50') as $r) {
                     $review[] = ['type' => $t, 'id' => (int)$r['id'], 'title' => $r['title'], 'status' => $r['status']];
                 }
             }

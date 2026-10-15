@@ -62,7 +62,8 @@ $megaCols = function (string $idPrefix) use ($groups) {
       <a class="header__phone" href="<?= e(tel_href($phone)) ?>" aria-label="Call us at <?= e($phone) ?>"><span class="ring"><?= icon('phone') ?></span><span class="label"><small>Call now</small><?= e($phone) ?></span></a>
       <?php endif; ?>
       <a class="btn btn--accent btn--magnetic" href="<?= e(url('request-a-quote/')) ?>"<?= $cur('/request-a-quote/') ?>>Get a Quote<?= icon('arrow-right', 'icon icon--arrow') ?></a>
-      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="drawer" data-drawer-open><?= icon('menu') ?><span class="sr-only">Open menu</span></button>
+      <button class="menu-toggle js-only" type="button" aria-expanded="false" aria-controls="drawer" data-drawer-open><?= icon('menu') ?><span class="sr-only">Open menu</span></button>
+      <a class="menu-toggle no-js-only" href="#drawer"><?= icon('menu') ?><span class="sr-only">Open menu</span></a>
     </div>
   </div>
 
@@ -76,7 +77,7 @@ $megaCols = function (string $idPrefix) use ($groups) {
         <?= $megaCols('mega') ?>
       </div>
       <aside class="mega__promo on-dark">
-        <?php if ($promo = setting('testimonials_image') ?: setting('seo_og_image')): ?><?= img($promo, '', ['alt-empty' => 1, 'sizes' => '300px']) ?><?php endif; ?>
+        <?php if ($promo = Content::mediaByName('Sprinting_magazine_page') ?: setting('seo_og_image')): ?><?= img($promo, '', ['alt-empty' => 1, 'sizes' => '300px']) ?><?php endif; ?>
         <span class="cmyk-bar" aria-hidden="true" style="margin-bottom:14px"><span></span><span></span><span></span><span></span></span>
         <h3>Not sure what you need?</h3>
         <p>Our printing experts are ready to help you bring your ideas to life.</p>
@@ -86,12 +87,13 @@ $megaCols = function (string $idPrefix) use ($groups) {
   </div>
 </header>
 
-<div class="drawer" id="drawer" data-drawer aria-hidden="true">
+<div class="drawer" id="drawer" data-drawer>
   <div class="drawer__scrim" data-drawer-close></div>
   <div class="drawer__panel" role="dialog" aria-modal="true" aria-label="Menu">
     <div class="drawer__head">
       <a class="brand" href="<?= e(url('')) ?>"><?php if ($logo): ?><?= img($logo, setting('site_name'), ['loading' => 'lazy']) ?><?php else: ?><span class="brand__word"><?= e(setting('site_name')) ?></span><?php endif; ?></a>
-      <button class="drawer__close" type="button" data-drawer-close><?= icon('x') ?><span class="sr-only">Close menu</span></button>
+      <button class="drawer__close js-only" type="button" data-drawer-close><?= icon('x') ?><span class="sr-only">Close menu</span></button>
+      <a class="drawer__close no-js-only" href="#"><?= icon('x') ?><span class="sr-only">Close menu</span></a>
     </div>
     <div class="drawer__body">
       <ul class="drawer__nav">
@@ -99,10 +101,11 @@ $megaCols = function (string $idPrefix) use ($groups) {
         <?php foreach ($menu as $m): ?>
         <?php if ($isProducts($m['url'])): ?>
         <li>
-          <button type="button" aria-expanded="false" aria-controls="drawer-products" data-drawer-products><?= e($m['label']) ?><?= icon('chevron-down') ?></button>
+          <a class="no-js-only" href="<?= e(url(ltrim($m['url'], '/'))) ?>"><?= e($m['label']) ?><?= icon('arrow-right') ?></a>
+          <button class="js-only" type="button" aria-expanded="false" aria-controls="drawer-products" data-drawer-products><?= e($m['label']) ?><?= icon('chevron-down') ?></button>
           <div class="drawer__products" id="drawer-products" hidden data-mega-scope>
             <label class="mega__search"><span class="sr-only">Search products</span><?= icon('search') ?><input type="search" placeholder="Search products" autocomplete="off" data-mega-search></label>
-            <?= $megaCols('drawer') ?>
+            <div data-mega-clone></div>
             <p><a class="link-arrow" href="<?= e(url('products/')) ?>">View all products<?= icon('arrow-right') ?></a></p>
           </div>
         </li>

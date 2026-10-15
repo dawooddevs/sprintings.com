@@ -299,7 +299,7 @@ final class SprintingsImport
                 $p = $this->media($m[2]);
                 if ($p !== '') {
                     $meta = Media::lookup($p);
-                    $out .= '<figure><img src="' . e($p) . '" alt="' . e($meta['alt'] ?? self::readableName($m[2])) . '"' . ($meta && $meta['width'] ? ' width="' . (int)$meta['width'] . '" height="' . (int)$meta['height'] . '"' : '') . '></figure>';
+                    $out .= '<figure><img src="' . e(url($p)) . '" alt="' . e($meta['alt'] ?? self::readableName($m[2])) . '"' . ($meta && $meta['width'] ? ' width="' . (int)$meta['width'] . '" height="' . (int)$meta['height'] . '"' : '') . '></figure>';
                 }
                 continue;
             }

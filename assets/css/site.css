@@ -306,14 +306,14 @@ button { font: inherit; }
 
 /* Mobile drawer */
 .drawer { position: fixed; inset: 0; z-index: 80; visibility: hidden; }
-.drawer.is-open { visibility: visible; }
+.drawer.is-open, .drawer:target { visibility: visible; }
 .drawer__scrim { position: absolute; inset: 0; background: rgba(10, 37, 45, .55); opacity: 0; transition: opacity .3s; }
-.drawer.is-open .drawer__scrim { opacity: 1; }
+.drawer.is-open .drawer__scrim, .drawer:target .drawer__scrim { opacity: 1; }
 .drawer__panel {
   position: absolute; top: 0; right: 0; bottom: 0; width: min(420px, 92vw); background: var(--paper); display: flex; flex-direction: column;
   transform: translateX(100%); transition: transform .45s var(--ease); box-shadow: -20px 0 60px rgba(0, 0, 0, .25);
 }
-.drawer.is-open .drawer__panel { transform: none; }
+.drawer.is-open .drawer__panel, .drawer:target .drawer__panel { transform: none; }
 .drawer__head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: var(--teal-900); }
 .drawer__head .brand img { height: 40px; }
 .drawer__close { width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .25); background: transparent; color: #fff; display: grid; place-items: center; cursor: pointer; }
@@ -739,6 +739,8 @@ button { font: inherit; }
 .stars .icon { width: 18px; height: 18px; }
 .stars .icon--off { color: #d9d2c5; }
 .review blockquote { margin: 0; font-size: 1.02rem; line-height: 1.6; color: var(--ink); flex: 1; }
+.review blockquote p { display: -webkit-box; -webkit-line-clamp: 7; -webkit-box-orient: vertical; overflow: hidden; }
+.review blockquote p:hover, .review blockquote p:focus-within { -webkit-line-clamp: unset; }
 .on-dark .review blockquote { color: #e8f1f3; }
 .review figcaption { display: flex; align-items: center; gap: 12px; font-size: .92rem; }
 .review__avatar { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; color: #fff; background: var(--teal); flex: none; }
@@ -817,7 +819,7 @@ button { font: inherit; }
 .post-card__meta { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: .82rem; color: var(--muted); margin-bottom: 10px; }
 .post-card h2, .post-card h3 { font-size: 1.3rem; margin-bottom: .45em; transition: color .2s; }
 .post-card:hover h2, .post-card:hover h3 { color: var(--orange-ink); }
-.post-card p { font-size: .95rem; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.post-card p:not(.post-card__meta) { font-size: .95rem; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .post-card .link-arrow { margin-top: auto; }
 .post-card--feature { grid-column: 1 / -1; display: grid; grid-template-columns: 1.2fr 1fr; }
 .post-card--feature .post-card__img { aspect-ratio: auto; min-height: 340px; }
@@ -881,7 +883,7 @@ button { font: inherit; }
 .footer__top { display: grid; grid-template-columns: 1.3fr 1fr 1fr 1.4fr; gap: 40px; padding-block: clamp(48px, 6vw, 80px) 40px; }
 .footer__brand img { height: 52px; width: auto; max-width: 170px; margin-bottom: 18px; }
 .footer__brand p { max-width: 34ch; }
-.footer h2 { font-size: .78rem; letter-spacing: .16em; text-transform: uppercase; color: #fff; margin-bottom: 16px; }
+.site-footer h2 { font-size: .78rem; letter-spacing: .16em; text-transform: uppercase; color: #fff; margin-bottom: 16px; }
 .footer__links { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
 .footer__links a { display: inline-flex; align-items: center; gap: 8px; }
 .social { display: flex; gap: 10px; margin-top: 18px; }
@@ -955,8 +957,8 @@ button { font: inherit; }
   .tile--xl, .tile--lg { grid-column: span 12; grid-row: auto; min-height: 380px; }
   .p-body, .article, .wizard { grid-template-columns: minmax(0, 1fr); }
   .quote-panel, .article-aside, .wizard__aside { position: static; }
-  .wizard__aside .steps { display: flex; gap: 6px; overflow-x: auto; }
-  .wizard__aside .steps li { flex: 1 0 auto; }
+  .wizard__aside .steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .wizard__aside .steps button { flex-direction: column; text-align: center; gap: 6px; padding: 10px 4px; font-size: .82rem; line-height: 1.2; }
   .steps button small { display: none; }
   .guarantee { grid-template-columns: auto minmax(0, 1fr); }
   .guarantee .btn { grid-column: 1 / -1; justify-self: start; }

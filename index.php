@@ -83,7 +83,7 @@ if ($path === '/api/treatments') {
     $slice = array_slice($items, $offset, $limit > 0 ? $limit : null);
     $html = '';
     foreach ($slice as $s) {
-        $html .= render('partials/service-card', ['s' => $s]);
+        $html .= render('partials/product-card', ['s' => $s]);
     }
     header('Cache-Control: public, max-age=300');
     echo json_encode(['html' => $html, 'total' => count($items), 'next' => $offset + count($slice)]);
