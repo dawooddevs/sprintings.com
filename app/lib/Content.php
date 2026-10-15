@@ -523,4 +523,17 @@ final class Content
     {
         return self::testimonials($featuredOnly);
     }
+
+    /** Library path of an imported file by its original file name (e.g. a homepage icon), or ''. */
+    public static function mediaByName(string $name): string
+    {
+        static $map = null;
+        if ($map === null) {
+            $map = [];
+            foreach (DB::all('SELECT path, original_name FROM media ORDER BY id') as $r) {
+                $map[strtolower(pathinfo((string)$r['original_name'], PATHINFO_FILENAME))] = $r['path'];
+            }
+        }
+        return $map[strtolower(pathinfo($name, PATHINFO_FILENAME))] ?? '';
+    }
 }

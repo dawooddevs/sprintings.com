@@ -227,7 +227,8 @@ function icon(string $name, string $class = 'icon'): string
 
 /**
  * Responsive image tag. Uses the WebP sibling and stored dimensions from the
- * media library when available to avoid layout shift.
+ * media library when available to avoid layout shift. Pass 'sizes' (e.g.
+ * '(max-width: 720px) 100vw, 400px') to also offer the 480px thumbnail.
  */
 function img(?string $src, string $alt = '', array $attrs = []): string
 {
@@ -236,14 +237,17 @@ function img(?string $src, string $alt = '', array $attrs = []): string
         return '';
     }
     $meta = Media::lookup($src);
+    $sizes = $attrs['sizes'] ?? null;
+    unset($attrs['sizes']);
     $a = array_merge(['loading' => 'lazy', 'decoding' => 'async'], $attrs);
     if ($meta && empty($a['width']) && $meta['width']) {
         $a['width'] = $meta['width'];
         $a['height'] = $meta['height'];
     }
-    if ($alt === '' && $meta) {
+    if ($alt === '' && $meta && !array_key_exists('alt-empty', $attrs)) {
         $alt = $meta['alt'];
     }
+    unset($a['alt-empty']);
     $html = '';
     foreach ($a as $k => $v) {
         if ($v === null || $v === false) {
@@ -253,7 +257,12 @@ function img(?string $src, string $alt = '', array $attrs = []): string
     }
     $tag = '<img src="' . e(media_url($src)) . '" alt="' . e($alt) . '"' . $html . '>';
     if ($meta && $meta['webp'] && $meta['webp'] !== $src) {
-        return '<picture><source type="image/webp" srcset="' . e(media_url($meta['webp'])) . '">' . $tag . '</picture>';
+        $set = e(media_url($meta['webp']));
+        if ($sizes && !empty($meta['thumb']) && (int)$meta['width'] > 480) {
+            $set = e(media_url($meta['thumb'])) . ' 480w, ' . $set . ' ' . (int)$meta['width'] . 'w';
+            return '<picture><source type="image/webp" srcset="' . $set . '" sizes="' . e($sizes) . '">' . $tag . '</picture>';
+        }
+        return '<picture><source type="image/webp" srcset="' . $set . '">' . $tag . '</picture>';
     }
     return $tag;
 }

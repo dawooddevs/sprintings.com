@@ -32,7 +32,7 @@ final class Media
         if (self::$map === null) {
             self::$map = [];
             try {
-                foreach (DB::all('SELECT path, webp, width, height, alt FROM media') as $r) {
+                foreach (DB::all('SELECT path, webp, thumb, width, height, alt FROM media') as $r) {
                     self::$map[$r['path']] = $r;
                 }
             } catch (Throwable $e) {
@@ -234,6 +234,12 @@ final class Media
         if (!$src) {
             return $out;
         }
+        // WebP cannot be written from palette images (GD writes an empty file): convert first, keeping transparency
+        if (!imageistruecolor($src)) {
+            imagepalettetotruecolor($src);
+        }
+        imagealphablending($src, false);
+        imagesavealpha($src, true);
         if (in_array($ext, ['jpg', 'jpeg'], true) && function_exists('exif_read_data')) {
             $exif = @exif_read_data($file);
             $o = (int)($exif['Orientation'] ?? 1);
@@ -272,7 +278,12 @@ final class Media
             if ($ext !== 'webp') {
                 $webp = $sub . '/' . $base . '.webp';
                 if (!file_exists(ROOT . '/' . $webp) && @imagewebp($src, ROOT . '/' . $webp, 80)) {
-                    $out['webp'] = $webp;
+                    clearstatcache(true, ROOT . '/' . $webp);
+                    if ((int)@filesize(ROOT . '/' . $webp) > 0) {
+                        $out['webp'] = $webp;
+                    } else {
+                        @unlink(ROOT . '/' . $webp);
+                    }
                 }
             }
             $tw = 480;
@@ -280,7 +291,12 @@ final class Media
                 $thumb = self::resample($src, $tw, (int)round($h * $tw / $w));
                 $tp = $sub . '/' . $base . '-thumb.webp';
                 if (@imagewebp($thumb, ROOT . '/' . $tp, 78)) {
-                    $out['thumb'] = $tp;
+                    clearstatcache(true, ROOT . '/' . $tp);
+                    if ((int)@filesize(ROOT . '/' . $tp) > 0) {
+                        $out['thumb'] = $tp;
+                    } else {
+                        @unlink(ROOT . '/' . $tp);
+                    }
                 }
                 imagedestroy($thumb);
             }
